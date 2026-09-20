@@ -1,4 +1,4 @@
-const API_BASE_URL = 'tradspire-backend.vercel.app'; // e.g. https://tradspirebackend.vercel.app
+const API_BASE_URL = 'https://tradspire-backend.vercel.app'; // e.g. https://tradspirebackend.vercel.app
 
 // Tab Switcher
 function switchTab(tabName) {
