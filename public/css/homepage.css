@@ -1,0 +1,292 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: #222;
+  background: #f5f5f5;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  text-decoration: none;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 16px 6%;
+  background: #fff;
+}
+
+.logo {
+  color: #f68b1e;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.logo span {
+  color: #222;
+}
+
+.search {
+  display: flex;
+  flex: 1;
+  max-width: 650px;
+}
+
+.search input {
+  flex: 1;
+  padding: 13px;
+  border: 1px solid #ddd;
+}
+
+.search button,
+.shop-button,
+.cart-button {
+  border: 0;
+  color: #fff;
+  background: #f68b1e;
+  padding: 13px 22px;
+}
+
+.actions {
+  display: flex;
+  gap: 15px;
+}
+
+.actions button {
+  border: 0;
+  background: none;
+}
+
+.nav {
+  display: flex;
+  gap: 30px;
+  padding: 13px 6%;
+  color: #fff;
+  background: #222;
+}
+
+.nav a {
+  color: #fff;
+}
+
+.container {
+  display: flex;
+  gap: 20px;
+  max-width: 1400px;
+  margin: 25px auto;
+  padding: 0 20px;
+}
+
+.sidebar {
+  flex: 0 0 230px;
+  height: fit-content;
+  padding: 18px 0;
+  background: #fff;
+}
+
+.sidebar h3 {
+  padding: 0 20px;
+}
+
+.sidebar a {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 20px;
+  color: #555;
+}
+
+.sidebar a:hover {
+  color: #f68b1e;
+  background: #fff1e4;
+}
+
+.content {
+  flex: 1;
+}
+
+.hero {
+  position: relative;
+  min-height: 330px;
+  color: #fff;
+  border-radius: 7px;
+  background:
+    linear-gradient(90deg, #111b, #1112),
+    url("https://images.unsplash.com/photo-1607082349566-187342175e2f?auto=format&fit=crop&w=1400&q=80")
+    center / cover;
+}
+
+.hero-content {
+  padding: 55px 9%;
+}
+
+.hero h1 {
+  max-width: 420px;
+  margin: 12px 0;
+  font-size: 42px;
+}
+
+.hero p {
+  color: #ffc107;
+  font-weight: bold;
+}
+
+.shop-button {
+  margin-top: 22px;
+  border-radius: 4px;
+}
+
+.carousel {
+  position: absolute;
+  top: 45%;
+  z-index: 1;
+  border: 0;
+  color: white;
+  background: #0008;
+  font-size: 32px;
+}
+
+.previous {
+  left: 12px;
+}
+
+.next {
+  right: 12px;
+}
+
+.dots {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  margin: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: white;
+}
+
+.dot.active {
+  background: #f68b1e;
+}
+
+.benefits {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.benefits div {
+  padding: 18px;
+  background: #fff;
+}
+
+.benefits small {
+  display: block;
+  margin-top: 6px;
+  color: #777;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-heading a {
+  color: #f68b1e;
+}
+
+.products {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.product {
+  overflow: hidden;
+  background: #fff;
+}
+
+.product img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+}
+
+.product-info {
+  padding: 14px;
+}
+
+.product h3 {
+  min-height: 40px;
+  font-size: 15px;
+}
+
+.product strong {
+  color: #f68b1e;
+  font-size: 18px;
+}
+
+.product del {
+  margin-left: 8px;
+  color: #999;
+  font-size: 13px;
+}
+
+.cart-button {
+  width: 100%;
+  margin-top: 12px;
+  border-radius: 4px;
+}
+
+@media (max-width: 900px) {
+  .topbar {
+    flex-wrap: wrap;
+  }
+
+  .search {
+    order: 3;
+    flex-basis: 100%;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .products {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .actions {
+    display: none;
+  }
+
+  .nav {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .benefits {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h1 {
+    font-size: 30px;
+  }
+}

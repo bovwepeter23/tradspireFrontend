@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shopmart</title>
+  <link rel="stylesheet" href="../css/homepage.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">shop<span>mart</span></div>
+
+    <div class="search">
+      <input type="search" placeholder="Search products, brands and categories..." />
+      <button>Search</button>
+    </div>
+
+    <div class="actions">
+      <button>👤 Account</button>
+      <button>❓ Help</button>
+      <button>🛒 Cart (2)</button>
+    </div>
+  </header>
+
+  <nav class="nav">
+    <a href="#">☰ Categories</a>
+    <a href="#deals">Flash Sales</a>
+    <a href="#new">New Arrivals</a>
+    <a href="#fashion">Fashion</a>
+    <a href="#electronics">Electronics</a>
+  </nav>
+
+  <main class="container">
+    <aside class="sidebar">
+      <h3>Categories</h3>
+      <a href="#">Phones & Tablets <span>›</span></a>
+      <a href="#">Electronics <span>›</span></a>
+      <a href="#">Fashion <span>›</span></a>
+      <a href="#">Home & Office <span>›</span></a>
+      <a href="#">Health & Beauty <span>›</span></a>
+      <a href="#">Computing <span>›</span></a>
+      <a href="#">Sports & Fitness <span>›</span></a>
+      <a href="#">Automotive <span>›</span></a>
+    </aside>
+
+    <section class="content">
+      <section class="hero">
+        <button class="carousel previous">‹</button>
+
+        <div class="hero-content">
+          <p>LIMITED TIME OFFER</p>
+          <h1 id="hero-title">Big savings are here</h1>
+          <div id="hero-subtitle">
+            Discover amazing deals on your favorite products.
+          </div>
+          <button class="shop-button">Shop Now</button>
+        </div>
+
+        <button class="carousel next">›</button>
+        <div class="dots"></div>
+      </section>
+
+      <section class="benefits">
+        <div>🚚 <strong>Free Delivery</strong><small>On selected orders</small></div>
+        <div>🔒 <strong>Secure Payment</strong><small>100% secure checkout</small></div>
+        <div>↩️ <strong>Easy Returns</strong><small>7-day return policy</small></div>
+      </section>
+
+      <section id="deals">
+        <div class="section-heading">
+          <h2>Flash Sales</h2>
+          <a href="#">View All →</a>
+        </div>
+
+        <div class="products">
+          <article class="product">
+            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=500&q=80" alt="Headphones" />
+            <div class="product-info">
+              <h3>Wireless Bluetooth Headphones</h3>
+              <strong>$29.99</strong> <del>$49.99</del>
+              <button class="cart-button">Add to Cart</button>
+            </div>
+          </article>
+
+          <article class="product">
+            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=500&q=80" alt="Smart watch" />
+            <div class="product-info">
+              <h3>Smart Watch Series 8</h3>
+              <strong>$39.99</strong> <del>$69.99</del>
+              <button class="cart-button">Add to Cart</button>
+            </div>
+          </article>
+
+          <article class="product">
+            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=80" alt="Running sneakers" />
+            <div class="product-info">
+              <h3>Classic Running Sneakers</h3>
+              <strong>$45.00</strong> <del>$80.00</del>
+              <button class="cart-button">Add to Cart</button>
+            </div>
+          </article>
+
+          <article class="product">
+            <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=500&q=80" alt="Leather backpack" />
+            <div class="product-info">
+              <h3>Modern Leather Backpack</h3>
+              <strong>$34.50</strong> <del>$60.00</del>
+              <button class="cart-button">Add to Cart</button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="../js/homepage.js"></script>
+</body>
+</html>

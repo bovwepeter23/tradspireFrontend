@@ -62,13 +62,14 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
     if (!res.ok) throw new Error(data.message || 'Login failed');
 
-    // Save JWT token locally
     localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.setItem('role', data.user?.role || '');
+
     showAlert('Login successful! Redirecting...', 'success');
     
-    // Redirect after brief pause
     setTimeout(() => {
-      window.location.href = '/dashboard.html';
+      window.location.href = '../html/homepage.html';
     }, 1500);
 
   } catch (err) {
