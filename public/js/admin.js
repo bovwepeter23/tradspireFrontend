@@ -104,6 +104,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   imageInput.addEventListener('change', () => {
     const file = imageInput.files[0];
     if (previewUrl) URL.revokeObjectURL(previewUrl);
+    if (file && file.size > 4 * 1024 * 1024) {
+      imageInput.value = '';
+      previewUrl = null;
+      imagePreview.hidden = true;
+      setMessage('Choose an image smaller than 4 MB.', true);
+      return;
+    }
     previewUrl = file ? URL.createObjectURL(file) : null;
     imagePreview.hidden = !previewUrl;
     if (previewUrl) imagePreview.src = previewUrl;
