@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (sidebar) sidebar.id = "appSidebar";
 
   if (currentPage === "admin.html" && !isAdmin) {
-    window.location.replace("/html/homepage.html");
+    window.location.replace("homepage.html");
     return;
   }
 
@@ -27,12 +27,12 @@ document.addEventListener("DOMContentLoaded", () => {
   if (sidebar) {
     sidebar.innerHTML = `<nav class="sidebar-nav" aria-label="Main navigation">${navigation.map((item) => {
       const active = currentPage === item.page || (item.page === "products.html" && currentPage === "product.html");
-      return `<a href="/html/${item.page}" class="nav-item${active ? " active" : ""}"${active ? ' aria-current="page"' : ""}><i data-lucide="${item.icon}" aria-hidden="true"></i><span>${item.label}</span></a>`;
+      return `<a href="${item.page}" class="nav-item${active ? " active" : ""}"${active ? ' aria-current="page"' : ""}><i data-lucide="${item.icon}" aria-hidden="true"></i><span>${item.label}</span></a>`;
     }).join("")}<button class="nav-item nav-logout-button" type="button" data-logout><i data-lucide="log-out" aria-hidden="true"></i><span>Log out</span></button></nav>`;
   }
 
   if (topbar) {
-    topbar.innerHTML = '<div class="topbar-leading"><button class="menu-toggle" type="button" data-menu-toggle aria-controls="appSidebar" aria-expanded="false" aria-label="Open navigation"><i data-lucide="menu" aria-hidden="true"></i></button><a class="company-name" href="/html/homepage.html">Tradspire</a></div><nav class="topbar-actions" aria-label="Account navigation"><a class="icon-btn" href="/html/cart.html" aria-label="Cart" title="Cart"><i data-lucide="shopping-cart" aria-hidden="true"></i></a><a class="icon-btn" href="/html/profile.html" aria-label="Profile" title="Profile"><i data-lucide="user" aria-hidden="true"></i></a></nav>';
+    topbar.innerHTML = '<div class="topbar-leading"><button class="menu-toggle" type="button" data-menu-toggle aria-controls="appSidebar" aria-expanded="false" aria-label="Open navigation"><i data-lucide="menu" aria-hidden="true"></i></button><a class="company-name" href="homepage.html">Tradspire</a></div><nav class="topbar-actions" aria-label="Account navigation"><a class="icon-btn" href="cart.html" aria-label="Cart" title="Cart"><i data-lucide="shopping-cart" aria-hidden="true"></i></a><a class="icon-btn" href="profile.html" aria-label="Profile" title="Profile"><i data-lucide="user" aria-hidden="true"></i></a></nav>';
   }
 
   if (window.lucide) {
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("role");
-    window.location.replace("/index.html");
+    window.location.replace("../index.html");
   };
 
   document.querySelectorAll("[data-logout], #logoutButton").forEach((button) => {

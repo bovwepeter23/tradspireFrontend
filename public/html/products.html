@@ -15,9 +15,13 @@
       <p class="eyebrow">Marketplace</p>
       <h1>Products</h1>
       <p class="page-description">Browse goods and creations from our community.</p>
-      <p class="empty-state">There are no products to display yet. Please check back soon.</p>
+      <div class="product-grid" data-product-grid aria-live="polite">
+        <p class="empty-state">Loading products...</p>
+      </div>
     </main>
   </div>
+  <script src="../js/api.js"></script>
   <script src="../js/homepage.js"></script>
+  <script src="../js/catalog.js"></script>
 </body>
 </html>

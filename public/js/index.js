@@ -1,5 +1,3 @@
-const API_BASE_URL = 'https://tradspire-backend.vercel.app'; // e.g. https://tradspirebackend.vercel.app
-
 // Tab Switcher
 function switchTab(tabName) {
   const loginForm = document.getElementById('loginForm');
@@ -52,15 +50,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   const password = document.getElementById('loginPassword').value;
 
   try {
-    const res = await fetch(`${API_BASE_URL}/api/users/login`, {
+    const data = await window.TradspireAPI.request('/api/users/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: { email, password }
     });
-
-    const data = await res.json();
-
-    if (!res.ok) throw new Error(data.message || 'Login failed');
 
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
@@ -87,17 +80,12 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
   const password = document.getElementById('regPassword').value;
 
   try {
-    const res = await fetch(`${API_BASE_URL}/api/users`, {
+    const data = await window.TradspireAPI.request('/api/users', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password })
+      body: { name, email, password }
     });
 
-    const data = await res.json();
-
-    if (!res.ok) throw new Error(data.message || 'Registration failed');
-
-    showAlert('Account created! Check your email to verify your account.', 'success');
+    showAlert(data.message || 'Account created successfully.', 'success');
     document.getElementById('registerForm').reset();
 
   } catch (err) {
@@ -113,17 +101,12 @@ document.getElementById('recoverForm').addEventListener('submit', async (e) => {
   const email = document.getElementById('recoverEmail').value;
 
   try {
-    const res = await fetch(`${API_BASE_URL}/api/users/forgot-password`, {
+    const data = await window.TradspireAPI.request('/api/users/forgot-password', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
+      body: { email }
     });
 
-    const data = await res.json();
-
-    if (!res.ok) throw new Error(data.message || 'Request failed');
-
-    showAlert('Password reset link sent to your email.', 'success');
+    showAlert(data.message || 'Password reset link sent.', 'success');
     document.getElementById('recoverForm').reset();
 
   } catch (err) {
