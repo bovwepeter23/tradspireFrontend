@@ -67,9 +67,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     localStorage.setItem('role', data.user?.role || '');
 
     showAlert('Login successful! Redirecting...', 'success');
-    
+
     setTimeout(() => {
-      window.location.replace('/html/homepage.html');
+      window.location.replace('../html/homepage.html');
     }, 1000);
 
   } catch (err) {
