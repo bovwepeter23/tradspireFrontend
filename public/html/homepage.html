@@ -19,10 +19,29 @@
       <p class="eyebrow">Your marketplace</p>
       <h1>Welcome to Tradspire</h1>
       <p class="page-description">Discover products rooted in craft, culture, and community.</p>
-      <a class="text-link" href="/html/products.html">Explore products</a>
+      <a class="text-link" href="products.html">Explore products</a>
+      <section class="featured-section" aria-labelledby="featuredTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Made to be discovered</p>
+            <h2 id="featuredTitle">Featured finds</h2>
+          </div>
+          <div class="carousel-controls" aria-label="Featured products">
+            <button class="carousel-arrow" type="button" data-carousel-previous aria-label="Previous product"><i data-lucide="arrow-left" aria-hidden="true"></i></button>
+            <button class="carousel-arrow" type="button" data-carousel-next aria-label="Next product"><i data-lucide="arrow-right" aria-hidden="true"></i></button>
+          </div>
+        </div>
+        <div class="carousel-slide" data-carousel-slide aria-live="polite"></div>
+        <div class="carousel-footer">
+          <div class="carousel-dots" data-carousel-dots aria-label="Choose a featured product"></div>
+          <p class="carousel-count" data-carousel-count></p>
+        </div>
+      </section>
     </main>
   </div>
 
+  <script src="../js/api.js"></script>
   <script src="../js/homepage.js"></script>
+  <script src="../js/carousel.js"></script>
 </body>
 </html>

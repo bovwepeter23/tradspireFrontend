@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Products | Tradspire</title>
+  <title>Product | Tradspire</title>
   <link rel="stylesheet" href="../css/homepage.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -12,16 +12,14 @@
   <div class="layout-body">
     <aside class="sidebar" data-app-sidebar></aside>
     <main class="main-content">
-      <p class="eyebrow">Marketplace</p>
-      <h1>Products</h1>
-      <p class="page-description">Browse goods and creations from our community.</p>
-      <div class="product-grid" data-product-grid aria-live="polite">
-        <p class="empty-state">Loading products...</p>
-      </div>
+      <a class="back-link" href="products.html"><i data-lucide="arrow-left" aria-hidden="true"></i> Back to products</a>
+      <section class="product-detail" data-product-detail aria-live="polite">
+        <p class="empty-state">Loading product...</p>
+      </section>
     </main>
   </div>
   <script src="../js/api.js"></script>
   <script src="../js/homepage.js"></script>
-  <script src="../js/catalog.js"></script>
+  <script src="../js/product.js"></script>
 </body>
 </html>

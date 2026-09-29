@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | Tradspire</title>
+  <link rel="stylesheet" href="../css/homepage.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <header class="topbar" data-app-topbar></header>
+  <div class="layout-body">
+    <aside class="sidebar" data-app-sidebar></aside>
+    <main class="main-content admin-content" data-admin-content hidden>
+      <p class="eyebrow">Marketplace</p>
+      <h1>Product management</h1>
+      <p class="page-description">Create and maintain products shown in the storefront.</p>
+      <p class="admin-message" data-admin-message role="status"></p>
+      <div class="admin-dashboard">
+        <form class="admin-form" id="productForm">
+          <h2 data-product-form-heading>Add product</h2>
+          <label for="productName">Product name</label>
+          <input id="productName" name="name" type="text" maxlength="120" required>
+          <label for="productCategory">Category</label>
+          <input id="productCategory" name="category" type="text" maxlength="80" required>
+          <div class="admin-form-row">
+            <div>
+              <label for="productPrice">Price (USD)</label>
+              <input id="productPrice" name="price" type="number" min="0" step="0.01" required>
+            </div>
+            <div>
+              <label for="productOrigin">Origin</label>
+              <input id="productOrigin" name="origin" type="text" maxlength="120" required>
+            </div>
+          </div>
+          <label for="productDescription">Description</label>
+          <textarea id="productDescription" name="description" rows="4" maxlength="2000" required></textarea>
+          <label for="productImageAlt">Image description</label>
+          <input id="productImageAlt" name="imageAlt" type="text" maxlength="180">
+          <label for="productImage">Product image</label>
+          <input id="productImage" name="image" type="file" accept="image/*" required>
+          <p class="admin-form-hint">Image files up to 4 MB.</p>
+          <img class="admin-image-preview" data-image-preview alt="Selected product preview" hidden>
+          <div class="admin-form-actions">
+            <button class="text-button admin-submit" type="submit">Create product</button>
+            <button class="admin-cancel" data-cancel-edit type="button" hidden>Cancel edit</button>
+          </div>
+        </form>
+        <section class="admin-inventory" aria-labelledby="inventoryTitle">
+          <div class="admin-inventory-heading">
+            <h2 id="inventoryTitle">Inventory</h2>
+            <span class="inventory-count" data-product-count>0</span>
+          </div>
+          <div class="admin-product-list" data-admin-product-list>
+            <p class="empty-state">Loading inventory...</p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="../js/api.js"></script>
+  <script src="../js/homepage.js"></script>
+  <script src="../js/admin.js"></script>
+</body>
+</html>
