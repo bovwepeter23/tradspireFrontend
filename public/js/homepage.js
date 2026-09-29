@@ -83,11 +83,23 @@ document.addEventListener("DOMContentLoaded", () => {
     setMenuOpen(false);
   }
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("role");
-    window.location.replace("../index.html");
+  const logout = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      if (token) {
+        await window.TradspireAPI.request("/api/users/logout", {
+          method: "POST",
+          token
+        });
+      }
+    } catch (error) {
+      console.error("Unable to revoke session on the server:", error);
+    } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("role");
+      window.location.replace("../index.html");
+    }
   };
 
   document.querySelectorAll("[data-logout], #logoutButton").forEach((button) => {
