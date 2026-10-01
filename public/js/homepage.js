@@ -83,11 +83,24 @@ document.addEventListener("DOMContentLoaded", () => {
     setMenuOpen(false);
   }
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("role");
-    window.location.replace("../index.html");
+  const logout = async (event) => {
+    const button = event.currentTarget;
+    const token = localStorage.getItem("token");
+    button.disabled = true;
+
+    try {
+      if (token && window.TradspireAPI) {
+        await window.TradspireAPI.request("/api/users/logout", {
+          method: "POST",
+          token
+        });
+      }
+    } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("role");
+      window.location.replace("../index.html");
+    }
   };
 
   document.querySelectorAll("[data-logout], #logoutButton").forEach((button) => {
