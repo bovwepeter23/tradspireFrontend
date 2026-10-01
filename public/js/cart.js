@@ -44,7 +44,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         image.alt = item.name;
         const details = document.createElement('div');
         details.className = 'cart-item-details';
-        details.append(makeText('h2', '', item.name), makeText('p', 'cart-item-price', money(item.price)));
+        const rentalText = item.purchaseType === 'rent' ? `Rent · ${item.rentalDays || 1} day(s)` : 'Buy';
+        details.append(makeText('h2', '', item.name), makeText('p', 'cart-item-price', `${rentalText} · ${money(item.price)}${item.purchaseType === 'rent' ? '/day' : ''}`));
         const quantityLabel = document.createElement('label');
         quantityLabel.textContent = 'Qty';
         const quantity = document.createElement('input');
@@ -58,11 +59,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const remove = makeText('button', 'cart-remove', 'Remove');
         remove.type = 'button';
         remove.dataset.removeCartItem = item.productId;
-        row.append(image, details, quantityLabel, makeText('strong', 'cart-line-total', money(item.price * item.quantity)), remove);
+        const duration = item.purchaseType === 'rent' ? Number(item.rentalDays || 1) : 1;
+        row.append(image, details, quantityLabel, makeText('strong', 'cart-line-total', money(item.price * item.quantity * duration)), remove);
         return row;
       }));
     }
-    totalElement.textContent = money(cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0));
+    totalElement.textContent = money(cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity) * (item.purchaseType === 'rent' ? Number(item.rentalDays || 1) : 1), 0));
     writeCart(cart);
     updateCartCount();
     const submit = checkoutForm.querySelector('[type="submit"]');
@@ -132,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         method: 'POST',
         token,
         body: {
-          items: cart.map((item) => ({ productId: item.productId, quantity: item.quantity })),
+          items: cart.map((item) => ({ productId: item.productId, quantity: item.quantity, purchaseType: item.purchaseType, rentalDays: item.rentalDays })),
           deliveryAddress
         }
       });

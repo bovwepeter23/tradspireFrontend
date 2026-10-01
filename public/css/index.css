@@ -666,6 +666,21 @@ body {
   font: inherit;
 }
 
+.product-mode {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid var(--border-gold);
+  border-radius: 4px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.product-rental-days[hidden] {
+  display: none;
+}
+
 .product-detail-add,
 .checkout-submit {
   display: inline-flex;
@@ -750,10 +765,16 @@ body {
 
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px;
   max-width: 1120px;
   margin-top: 28px;
+}
+
+@media (max-width: 900px) {
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .storefront-products {

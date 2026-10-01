@@ -64,6 +64,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
+  const initiallySelectedTab = adminTabs.find((tab) => tab.getAttribute('aria-selected') === 'true') || adminTabs[0];
+  if (initiallySelectedTab) selectAdminTab(initiallySelectedTab);
+
   const makeText = (tagName, className, text) => {
     const element = document.createElement(tagName);
     element.className = className;
@@ -223,7 +226,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         makeText('p', 'admin-product-meta', new Date(order.createdAt).toLocaleDateString())
       );
       const items = makeText('p', 'admin-product-meta', (order.items || [])
-        .map((item) => `${item.name} × ${item.quantity}`)
+        .map((item) => `${item.name} × ${item.quantity}${item.purchaseType === 'rent' ? ` · rent ${item.rentalDays || 1} day(s)` : ' · buy'}`)
         .join(' · '));
       const address = order.deliveryAddress || {};
       const destination = makeText('p', 'admin-product-meta', [

@@ -13,7 +13,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     const response = await window.TradspireAPI.request('/api/products');
-    const products = response.products || [];
+    const allProducts = response.products || [];
+    const homeLimit = window.matchMedia('(max-width: 900px)').matches ? 4 : 8;
+    const products = grid.hasAttribute('data-home-product-grid') ? allProducts.slice(0, homeLimit) : allProducts;
     if (!products.length) {
       grid.textContent = 'No products are available yet. Please check back soon.';
       grid.classList.add('product-grid-empty');

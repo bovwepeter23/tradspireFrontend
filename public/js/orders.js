@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const info = document.createElement('div');
         info.append(
           makeText('h3', '', item.name),
-          makeText('p', 'order-item-meta', `Qty ${item.quantity} · ${money(item.unitPrice)} each`)
+          makeText('p', 'order-item-meta', `${item.purchaseType === 'rent' ? `Rent · ${item.rentalDays || 1} day(s)` : 'Buy'} · Qty ${item.quantity} · ${money(item.unitPrice)} each`)
         );
         row.append(image, info, makeText('strong', '', money(item.lineTotal)));
         items.append(row);

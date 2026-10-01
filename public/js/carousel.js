@@ -17,40 +17,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (next) next.disabled = true;
   };
 
-  let products;
+  let carouselItems;
   try {
     const carouselResponse = await window.TradspireAPI.request('/api/carousel?limit=12');
-    const carouselItems = carouselResponse.images || carouselResponse.items || carouselResponse.carouselImages || carouselResponse.carousel || [];
-    if (carouselItems.length) {
-      products = carouselItems.map((item) => ({
-        ...item,
-        _id: item.productId || item._id,
-        name: item.title || item.name,
-        imageAlt: item.imageAlt || item.title || item.name,
-        categories: item.categories || item.category || '',
-        origin: item.origin || '',
-        description: item.description || '',
-        linkUrl: item.linkUrl || '',
-        isCarouselItem: true
-      }));
-    } else {
-      const response = await window.TradspireAPI.request('/api/products?limit=12');
-      products = response.products || [];
-    }
+    carouselItems = carouselResponse.images || carouselResponse.items || carouselResponse.carouselImages || carouselResponse.carousel || [];
   } catch (error) {
-    try {
-      const response = await window.TradspireAPI.request('/api/products?limit=12');
-      products = response.products || [];
-    } catch (fallbackError) {
-      showMessage(`Products are unavailable right now. ${fallbackError.message}`);
-      return;
-    }
-  }
-
-  if (!products.length) {
-    showMessage('No products have been added yet. Check back soon.');
+    showMessage(`Carousel images are unavailable right now. ${error.message}`);
     return;
   }
+
+  if (!carouselItems.length) {
+    showMessage('No carousel images have been uploaded yet.');
+    return;
+  }
+
+  const products = carouselItems.map((item) => ({
+    ...item,
+    _id: item.productId || item._id,
+    name: item.title || item.name || 'Tradspire feature',
+    imageAlt: item.imageAlt || item.title || item.name || 'Tradspire feature',
+    categories: item.categories || item.category || '',
+    origin: item.origin || '',
+    description: item.description || '',
+    linkUrl: item.linkUrl || '',
+    isCarouselItem: true
+  }));
 
   let activeIndex = 0;
 
@@ -73,8 +64,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const render = () => {
     const product = products[activeIndex];
     const productUrl = product.linkUrl || (product.productId
-      ? `product.html?id=${encodeURIComponent(product.productId)}`
-      : product.isCarouselItem ? '' : `product.html?id=${encodeURIComponent(product._id)}`);
+      ? `html/product.html?id=${encodeURIComponent(product.productId)}`
+      : '');
 
     const image = document.createElement('img');
     image.className = 'carousel-image';
@@ -149,4 +140,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   render();
+  const rotateCarousel = window.setInterval(() => {
+    activeIndex = (activeIndex + 1) % products.length;
+    render();
+  }, 60000);
+  window.addEventListener('beforeunload', () => window.clearInterval(rotateCarousel), { once: true });
 });
