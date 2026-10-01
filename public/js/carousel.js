@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let products;
   try {
     const carouselResponse = await window.TradspireAPI.request('/api/carousel?limit=12');
-    const carouselItems = carouselResponse.items || carouselResponse.carouselImages || carouselResponse.carousel || [];
+    const carouselItems = carouselResponse.images || carouselResponse.items || carouselResponse.carouselImages || carouselResponse.carousel || [];
     if (carouselItems.length) {
       products = carouselItems.map((item) => ({
         ...item,
@@ -29,7 +29,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         imageAlt: item.imageAlt || item.title || item.name,
         categories: item.categories || item.category || '',
         origin: item.origin || '',
-        description: item.description || ''
+        description: item.description || '',
+        linkUrl: item.linkUrl || '',
+        isCarouselItem: true
       }));
     } else {
       const response = await window.TradspireAPI.request('/api/products?limit=12');
@@ -70,41 +72,51 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const render = () => {
     const product = products[activeIndex];
-    const productUrl = `product.html?id=${encodeURIComponent(product._id)}`;
-    const imageLink = document.createElement('a');
-    imageLink.className = 'carousel-image-link';
-    imageLink.href = productUrl;
-    imageLink.setAttribute('aria-label', `View ${product.name}`);
+    const productUrl = product.linkUrl || (product.productId
+      ? `product.html?id=${encodeURIComponent(product.productId)}`
+      : product.isCarouselItem ? '' : `product.html?id=${encodeURIComponent(product._id)}`);
 
     const image = document.createElement('img');
     image.className = 'carousel-image';
     image.src = product.image;
     image.alt = product.imageAlt || product.name;
-    imageLink.append(image);
+    let imageContent = image;
+    if (productUrl) {
+      const imageLink = document.createElement('a');
+      imageLink.className = 'carousel-image-link';
+      imageLink.href = productUrl;
+      imageLink.setAttribute('aria-label', `View ${product.name}`);
+      imageLink.append(image);
+      imageContent = imageLink;
+    }
 
     const copy = document.createElement('div');
     copy.className = 'carousel-copy';
-    copy.append(
-      makeText('p', 'product-category', categoriesFor(product)),
-      makeText('h3', '', product.name),
-      makeText('p', 'carousel-origin', product.origin),
-      makeText('p', 'carousel-description', product.description)
-    );
+    const categories = categoriesFor(product);
+    if (categories) copy.append(makeText('p', 'product-category', categories));
+    copy.append(makeText('h3', '', product.name));
+    if (product.origin) copy.append(makeText('p', 'carousel-origin', product.origin));
+    if (product.description) copy.append(makeText('p', 'carousel-description', product.description));
 
-    const purchase = document.createElement('div');
-    purchase.className = 'carousel-purchase';
-    purchase.append(makeText('span', 'product-price', pricesFor(product)));
-    const productLink = document.createElement('a');
-    productLink.className = 'product-link';
-    productLink.href = productUrl;
-    productLink.append(document.createTextNode('View product '));
-    const icon = document.createElement('i');
-    icon.setAttribute('data-lucide', 'arrow-up-right');
-    icon.setAttribute('aria-hidden', 'true');
-    productLink.append(icon);
-    purchase.append(productLink);
-    copy.append(purchase);
-    slide.replaceChildren(imageLink, copy);
+    const prices = pricesFor(product);
+    if (prices || productUrl) {
+      const purchase = document.createElement('div');
+      purchase.className = 'carousel-purchase';
+      if (prices) purchase.append(makeText('span', 'product-price', prices));
+      if (productUrl) {
+        const productLink = document.createElement('a');
+        productLink.className = 'product-link';
+        productLink.href = productUrl;
+        productLink.append(document.createTextNode(product.isCarouselItem ? 'Discover more ' : 'View product '));
+        const icon = document.createElement('i');
+        icon.setAttribute('data-lucide', 'arrow-up-right');
+        icon.setAttribute('aria-hidden', 'true');
+        productLink.append(icon);
+        purchase.append(productLink);
+      }
+      copy.append(purchase);
+    }
+    slide.replaceChildren(imageContent, copy);
 
     count.textContent = `${String(activeIndex + 1).padStart(2, '0')} / ${String(products.length).padStart(2, '0')}`;
     dots.replaceChildren(...products.map((item, index) => {

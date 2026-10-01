@@ -14,11 +14,15 @@
     <main class="main-content">
       <p class="eyebrow">Your account</p>
       <h1>Orders</h1>
-      <p class="page-description">Track your purchases and review past orders.</p>
-      <p class="empty-state">You do not have any orders yet.</p>
+      <p class="page-description">Track delivery progress and manage orders that have not shipped.</p>
+      <p class="order-message" data-order-message role="status" aria-live="polite"></p>
+      <div class="orders-list" data-orders-list aria-live="polite">
+        <p class="empty-state">Loading orders...</p>
+      </div>
     </main>
   </div>
   <script src="../js/api.js"></script>
   <script src="../js/homepage.js"></script>
+  <script src="../js/orders.js"></script>
 </body>
 </html>

@@ -13,13 +13,57 @@
     <aside class="sidebar" data-app-sidebar></aside>
     <main class="main-content">
       <p class="eyebrow">Your account</p>
-      <h1>Shopping cart</h1>
-      <p class="page-description">Items you choose to purchase will appear here.</p>
-      <p class="empty-state">Your cart is empty.</p>
-      <a class="text-link" href="products.html">Browse products</a>
+      <h1>Your cart</h1>
+      <p class="page-description">Review your items and confirm where they should be delivered.</p>
+      <p class="cart-message" data-cart-message role="status" aria-live="polite"></p>
+      <div class="cart-layout">
+        <section class="cart-items" aria-label="Cart items" data-cart-items>
+          <p class="empty-state">Loading cart...</p>
+        </section>
+        <aside class="cart-summary" aria-labelledby="cartSummaryTitle">
+          <h2 id="cartSummaryTitle">Order summary</h2>
+          <p class="cart-total"><span>Subtotal</span><strong data-cart-total>$0.00</strong></p>
+          <p class="cart-shipping-note">Shipping is confirmed by the seller after your order.</p>
+          <form id="checkoutForm" class="checkout-form">
+            <div class="checkout-address-heading">
+              <h3>Delivery address</h3>
+              <a href="profile.html">Edit profile</a>
+            </div>
+            <label for="checkoutFullName">Recipient name</label>
+            <input id="checkoutFullName" name="fullName" autocomplete="shipping name" required>
+            <label for="checkoutPhone">Phone</label>
+            <input id="checkoutPhone" name="phone" type="tel" autocomplete="shipping tel" required>
+            <label for="checkoutAddress1">Street address</label>
+            <input id="checkoutAddress1" name="addressLine1" autocomplete="shipping address-line1" required>
+            <label for="checkoutAddress2">Apartment, suite, etc. (optional)</label>
+            <input id="checkoutAddress2" name="addressLine2" autocomplete="shipping address-line2">
+            <div class="checkout-location-grid">
+              <div>
+                <label for="checkoutCity">City</label>
+                <input id="checkoutCity" name="city" autocomplete="shipping address-level2" required>
+              </div>
+              <div>
+                <label for="checkoutRegion">State / region</label>
+                <input id="checkoutRegion" name="region" autocomplete="shipping address-level1" required>
+              </div>
+              <div>
+                <label for="checkoutPostalCode">Postal code</label>
+                <input id="checkoutPostalCode" name="postalCode" autocomplete="shipping postal-code" required>
+              </div>
+              <div>
+                <label for="checkoutCountry">Country</label>
+                <input id="checkoutCountry" name="country" autocomplete="shipping country-name" required>
+              </div>
+            </div>
+            <button class="checkout-submit" type="submit">Place order</button>
+          </form>
+          <a class="checkout-login" data-cart-login href="index.html" hidden>Sign in to place an order</a>
+        </aside>
+      </div>
     </main>
   </div>
   <script src="../js/api.js"></script>
   <script src="../js/homepage.js"></script>
+  <script src="../js/cart.js"></script>
 </body>
 </html>

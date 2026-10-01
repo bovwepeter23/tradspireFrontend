@@ -62,7 +62,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     showAlert('Login successful! Redirecting...', 'success');
 
     setTimeout(() => {
-      window.location.replace('../html/homepage.html');
+      window.location.replace('../homepage.html');
     }, 1000);
 
   } catch (err) {

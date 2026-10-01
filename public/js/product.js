@@ -70,10 +70,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     copy.className = 'product-detail-copy';
     const category = document.createElement('p');
     category.className = 'product-category';
-    category.textContent = categoriesFor(product);
-    const title = document.createElement('h1');
-    title.textContent = product.name;
-    const origin = document.createElement('p');
+      const makeText = (tagName, className, text) => {
+        const element = document.createElement(tagName);
+        element.className = className;
+        element.textContent = text;
+        return element;
+      };
+
+      const categoriesFor = (product) => Array.isArray(product.categories)
+        ? product.categories.join(' · ')
+        : product.categories || product.category || '';
+
+      const imageUrlFor = (image) => typeof image === 'string' ? image : image?.url || image?.image;
+
+      const availableFor = (product) => {
+        if (Array.isArray(product.availableFor)) return product.availableFor;
+        if (Array.isArray(product.listingType)) return product.listingType;
+        if (Array.isArray(product.listingTypes)) return product.listingTypes;
+        if (product.listingType) return [product.listingType];
+        return product.isRentable ? ['rent'] : ['buy'];
+      };
+
+      const setCartCount = () => {
+        const badge = document.querySelector('[data-cart-count]');
+        if (!badge) return;
+        let items;
+        try {
+          items = JSON.parse(localStorage.getItem('tradspire-cart') || '[]');
+          if (!Array.isArray(items)) items = [];
+        } catch (error) {
+          items = [];
+        }
+        const quantity = items.reduce((total, item) => total + Number(item.quantity || 0), 0);
+        badge.textContent = quantity > 99 ? '99+' : String(quantity);
+        badge.hidden = quantity === 0;
+      };
     origin.className = 'product-origin';
     origin.textContent = `Made in ${product.origin}`;
     const description = document.createElement('p');

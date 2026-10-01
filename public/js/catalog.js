@@ -20,10 +20,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    const productPage = window.location.pathname.includes('/html/') ? 'product.html' : 'html/product.html';
     const cards = products.map((product) => {
       const card = document.createElement('a');
       card.className = 'product-card';
-      card.href = `product.html?id=${encodeURIComponent(product._id)}`;
+      card.href = `${productPage}?id=${encodeURIComponent(product._id)}`;
 
       const image = document.createElement('img');
       image.className = 'product-card-image';

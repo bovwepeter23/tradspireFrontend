@@ -18,11 +18,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const carouselForm = document.getElementById('carouselForm');
   const carouselList = document.querySelector('[data-carousel-list]');
   const carouselCount = document.querySelector('[data-carousel-count]');
+  const adminOrdersList = document.querySelector('[data-admin-orders-list]');
+  const adminOrdersCount = document.querySelector('[data-admin-order-count]');
   const carouselHeading = document.querySelector('[data-carousel-form-heading]');
   const carouselSubmit = carouselForm?.querySelector('[type="submit"]');
   const carouselCancel = document.querySelector('[data-carousel-cancel]');
   const carouselImageInput = carouselForm?.elements.namedItem('image');
   const carouselImagePreview = document.querySelector('[data-carousel-image-preview]');
+  const adminTabs = [...document.querySelectorAll('[role="tab"][aria-controls]')];
+  const adminPanels = adminTabs.map((tab) => document.getElementById(tab.getAttribute('aria-controls')));
   let products = [];
   let editingId = null;
   let previewUrl = null;
@@ -34,6 +38,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     message.textContent = text;
     message.classList.toggle('is-error', isError);
   };
+
+  const selectAdminTab = (selectedTab) => {
+    adminTabs.forEach((tab, index) => {
+      const isSelected = tab === selectedTab;
+      tab.classList.toggle('is-active', isSelected);
+      tab.setAttribute('aria-selected', String(isSelected));
+      tab.tabIndex = isSelected ? 0 : -1;
+      adminPanels[index].hidden = !isSelected;
+    });
+  };
+
+  adminTabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => selectAdminTab(tab));
+    tab.addEventListener('keydown', (event) => {
+      let nextIndex;
+      if (event.key === 'ArrowRight') nextIndex = (index + 1) % adminTabs.length;
+      if (event.key === 'ArrowLeft') nextIndex = (index - 1 + adminTabs.length) % adminTabs.length;
+      if (event.key === 'Home') nextIndex = 0;
+      if (event.key === 'End') nextIndex = adminTabs.length - 1;
+      if (nextIndex === undefined) return;
+      event.preventDefault();
+      adminTabs[nextIndex].focus();
+      selectAdminTab(adminTabs[nextIndex]);
+    });
+  });
 
   const makeText = (tagName, className, text) => {
     const element = document.createElement(tagName);
@@ -150,7 +179,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       image.alt = item.imageAlt || item.title;
       const details = document.createElement('div');
       details.className = 'admin-product-info';
-      details.append(makeText('h3', '', item.title), makeText('p', 'admin-product-meta', item.productId || 'Homepage carousel'));
+      details.append(makeText('h3', '', item.title), makeText('p', 'admin-product-meta', item.linkUrl || 'Homepage carousel'));
       const actions = document.createElement('div');
       actions.className = 'admin-product-actions';
       const edit = makeText('button', 'admin-action', 'Edit');
@@ -168,10 +197,66 @@ document.addEventListener('DOMContentLoaded', async () => {
   const loadCarousel = async () => {
     try {
       const response = await window.TradspireAPI.request('/api/carousel?limit=100');
-      carouselItems = response.items || response.carouselImages || response.carousel || [];
+      carouselItems = response.images || response.items || response.carouselImages || response.carousel || [];
       renderCarousel();
     } catch (error) {
       carouselList.replaceChildren(makeText('p', 'empty-state', error.message));
+    }
+  };
+
+  const renderAdminOrders = (orders) => {
+    adminOrdersCount.textContent = String(orders.length);
+    if (!orders.length) {
+      adminOrdersList.replaceChildren(makeText('p', 'empty-state', 'No customer orders yet.'));
+      return;
+    }
+
+    const statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+    adminOrdersList.replaceChildren(...orders.map((order) => {
+      const row = document.createElement('article');
+      row.className = 'admin-order-row';
+      const summary = document.createElement('div');
+      summary.className = 'admin-order-summary';
+      summary.append(
+        makeText('h3', '', `Order ${order._id}`),
+        makeText('p', 'admin-product-meta', `${order.user?.name || 'Customer'} · ${order.user?.email || 'No email'}`),
+        makeText('p', 'admin-product-meta', new Date(order.createdAt).toLocaleDateString())
+      );
+      const items = makeText('p', 'admin-product-meta', (order.items || [])
+        .map((item) => `${item.name} × ${item.quantity}`)
+        .join(' · '));
+      const address = order.deliveryAddress || {};
+      const destination = makeText('p', 'admin-product-meta', [
+        address.fullName,
+        address.addressLine1,
+        address.city,
+        address.region,
+        address.postalCode,
+        address.country
+      ].filter(Boolean).join(', '));
+      const status = document.createElement('select');
+      status.className = 'admin-order-status';
+      status.dataset.orderStatus = order._id;
+      status.setAttribute('aria-label', `Status for order ${order._id}`);
+      statuses.forEach((value) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value.charAt(0).toUpperCase() + value.slice(1);
+        status.append(option);
+      });
+      status.value = order.status;
+      status.dataset.previousStatus = order.status;
+      row.append(summary, items, destination, makeText('strong', 'admin-product-price', `$${Number(order.total).toFixed(2)}`), status);
+      return row;
+    }));
+  };
+
+  const loadAdminOrders = async () => {
+    try {
+      const response = await window.TradspireAPI.request('/api/orders/admin', { token });
+      renderAdminOrders(response.orders || []);
+    } catch (error) {
+      adminOrdersList.replaceChildren(makeText('p', 'empty-state', error.message || 'Orders could not be loaded.'));
     }
   };
 
@@ -329,7 +414,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!item) return;
       editingCarouselId = item._id;
       carouselForm.elements.namedItem('title').value = item.title || '';
-      carouselForm.elements.namedItem('productId').value = item.productId || '';
+      carouselForm.elements.namedItem('linkUrl').value = item.linkUrl || '';
       carouselForm.elements.namedItem('imageAlt').value = item.imageAlt || item.title || '';
       carouselImageInput.value = '';
       carouselImageInput.required = false;
@@ -356,6 +441,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  adminOrdersList?.addEventListener('change', async (event) => {
+    const select = event.target.closest('[data-order-status]');
+    if (!select) return;
+    const previousStatus = select.dataset.previousStatus || select.value;
+    select.dataset.previousStatus = previousStatus;
+    select.disabled = true;
+    try {
+      await window.TradspireAPI.request(`/api/orders/${encodeURIComponent(select.dataset.orderStatus)}/status`, {
+        method: 'PUT',
+        token,
+        body: { status: select.value }
+      });
+      select.dataset.previousStatus = select.value;
+      setMessage('Order status updated.');
+    } catch (error) {
+      select.value = previousStatus;
+      setMessage(error.message || 'Order status could not be updated.', true);
+    } finally {
+      select.disabled = false;
+    }
+  });
+
   await loadProducts();
   await loadCarousel();
+  await loadAdminOrders();
 });

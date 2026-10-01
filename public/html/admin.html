@@ -13,10 +13,15 @@
     <aside class="sidebar" data-app-sidebar></aside>
     <main class="main-content admin-content" data-admin-content hidden>
       <p class="eyebrow">Marketplace</p>
-      <h1>Product management</h1>
-      <p class="page-description">Create and maintain products shown in the storefront.</p>
+      <h1>Storefront management</h1>
+      <p class="page-description">Manage products and homepage carousel images.</p>
       <p class="admin-message" data-admin-message role="status"></p>
-      <div class="admin-dashboard">
+      <div class="admin-tabs" role="tablist" aria-label="Admin sections">
+        <button class="admin-tab is-active" id="productsTab" type="button" role="tab" aria-selected="true" aria-controls="productsDashboard" tabindex="0">Products</button>
+        <button class="admin-tab" id="carouselTab" type="button" role="tab" aria-selected="false" aria-controls="carouselPanel" tabindex="-1">Carousel</button>
+        <button class="admin-tab" id="ordersTab" type="button" role="tab" aria-selected="false" aria-controls="ordersPanel" tabindex="-1">Orders</button>
+      </div>
+      <div class="admin-dashboard admin-panel" id="productsDashboard" role="tabpanel" aria-labelledby="productsTab">
         <form class="admin-form" id="productForm">
           <h2 data-product-form-heading>Add product</h2>
           <label for="productName">Product name</label>
@@ -68,7 +73,7 @@
           </div>
         </section>
       </div>
-      <section class="admin-carousel" aria-labelledby="carouselTitle">
+      <section class="admin-carousel admin-panel" id="carouselPanel" role="tabpanel" aria-labelledby="carouselTab" hidden>
         <div class="admin-inventory-heading">
           <div>
             <p class="eyebrow">Homepage feature</p>
@@ -80,8 +85,8 @@
           <h3 data-carousel-form-heading>Add carousel image</h3>
           <label for="carouselTitleInput">Title</label>
           <input id="carouselTitleInput" name="title" type="text" maxlength="120" required>
-          <label for="carouselLink">Product link (optional)</label>
-          <input id="carouselLink" name="productId" type="text" placeholder="Product ID">
+          <label for="carouselLink">Link URL (optional)</label>
+          <input id="carouselLink" name="linkUrl" type="url" placeholder="https://example.com/product">
           <label for="carouselImageAlt">Image description</label>
           <input id="carouselImageAlt" name="imageAlt" type="text" maxlength="180">
           <label for="carouselImage">Image</label>
@@ -94,6 +99,18 @@
         </form>
         <div class="admin-carousel-list" data-carousel-list>
           <p class="empty-state">Loading carousel images...</p>
+        </div>
+      </section>
+      <section class="admin-orders admin-panel" id="ordersPanel" role="tabpanel" aria-labelledby="ordersTab" hidden>
+        <div class="admin-inventory-heading">
+          <div>
+            <p class="eyebrow">Fulfilment</p>
+            <h2 id="adminOrdersTitle">Customer orders</h2>
+          </div>
+          <span class="inventory-count" data-admin-order-count>0</span>
+        </div>
+        <div class="admin-orders-list" data-admin-orders-list>
+          <p class="empty-state">Loading orders...</p>
         </div>
       </section>
     </main>
