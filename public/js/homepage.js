@@ -2,15 +2,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const sidebar = document.querySelector("[data-app-sidebar]");
   const topbar = document.querySelector("[data-app-topbar]");
   const currentPage = window.location.pathname.split("/").pop() || "homepage.html";
-  const role = (localStorage.getItem("role") || "").trim().toLowerCase();
-  const isAdmin = role === "admin";
 
   if (sidebar) sidebar.id = "appSidebar";
-
-  if (currentPage === "admin.html" && !isAdmin) {
-    window.location.replace("homepage.html");
-    return;
-  }
 
   document.querySelector("[data-admin-content]")?.removeAttribute("hidden");
 
@@ -22,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { label: "Account", icon: "user-round", page: "profile.html" }
   ];
 
-  if (isAdmin) navigation.push({ label: "Admin", icon: "shield-check", page: "admin.html" });
+  navigation.push({ label: "Admin", icon: "shield-check", page: "admin.html" });
 
   if (sidebar) {
     sidebar.innerHTML = `<nav class="sidebar-nav" aria-label="Main navigation">${navigation.map((item) => {

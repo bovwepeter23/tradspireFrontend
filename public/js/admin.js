@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  if ((localStorage.getItem('role') || '').trim().toLowerCase() !== 'admin') return;
-
   const form = document.getElementById('productForm');
   const message = document.querySelector('[data-admin-message]');
   const inventory = document.querySelector('[data-admin-product-list]');
@@ -93,13 +91,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     previewUrl = null;
   };
-
-  if (!token) {
-    setMessage('Sign in with an admin account to manage products.', true);
-    form.hidden = true;
-    await loadProducts();
-    return;
-  }
 
   imageInput.addEventListener('change', () => {
     const file = imageInput.files[0];
