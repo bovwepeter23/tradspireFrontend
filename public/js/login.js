@@ -1,0 +1,115 @@
+// Tab Switcher
+function switchTab(tabName) {
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const recoverForm = document.getElementById('recoverForm');
+  const authTabs = document.getElementById('authTabs');
+  const tabs = document.querySelectorAll('.tab-btn');
+  
+  hideAlert();
+
+  // Hide all forms first
+  loginForm.classList.add('hidden');
+  registerForm.classList.add('hidden');
+  recoverForm.classList.add('hidden');
+
+  if (tabName === 'login') {
+    authTabs.classList.remove('hidden');
+    loginForm.classList.remove('hidden');
+    tabs[0].classList.add('active');
+    tabs[1].classList.remove('active');
+  } else if (tabName === 'register') {
+    authTabs.classList.remove('hidden');
+    registerForm.classList.remove('hidden');
+    tabs[0].classList.remove('active');
+    tabs[1].classList.add('active');
+  } else if (tabName === 'recover') {
+    authTabs.classList.add('hidden'); // Hide tabs during recovery view
+    recoverForm.classList.remove('hidden');
+  }
+}
+
+// Alert Helper
+function showAlert(message, type = 'error') {
+  const alertBox = document.getElementById('alertBox');
+  alertBox.textContent = message;
+  alertBox.className = `alert-box ${type}`;
+}
+
+function hideAlert() {
+  const alertBox = document.getElementById('alertBox');
+  alertBox.className = 'alert-box hidden';
+}
+
+// 1. LOGIN HANDLER
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideAlert();
+
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+
+  try {
+    const data = await window.TradspireAPI.request('/api/users/login', {
+      method: 'POST',
+      body: { email, password }
+    });
+
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.setItem('role', data.user?.role || '');
+
+    showAlert('Login successful! Redirecting...', 'success');
+
+    setTimeout(() => {
+      window.location.replace('../index.html');
+    }, 1000);
+
+  } catch (err) {
+    showAlert(err.message, 'error');
+  }
+});
+
+// 2. REGISTER HANDLER
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideAlert();
+
+  const name = document.getElementById('regName').value;
+  const email = document.getElementById('regEmail').value;
+  const password = document.getElementById('regPassword').value;
+
+  try {
+    const data = await window.TradspireAPI.request('/api/users', {
+      method: 'POST',
+      body: { name, email, password }
+    });
+
+    showAlert(data.message || 'Account created successfully.', 'success');
+    document.getElementById('registerForm').reset();
+
+  } catch (err) {
+    showAlert(err.message, 'error');
+  }
+});
+
+// 3. RECOVER PASSWORD HANDLER
+document.getElementById('recoverForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideAlert();
+
+  const email = document.getElementById('recoverEmail').value;
+
+  try {
+    const data = await window.TradspireAPI.request('/api/users/forgot-password', {
+      method: 'POST',
+      body: { email }
+    });
+
+    showAlert(data.message || 'Password reset link sent.', 'success');
+    document.getElementById('recoverForm').reset();
+
+  } catch (err) {
+    showAlert(err.message, 'error');
+  }
+});

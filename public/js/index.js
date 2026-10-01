@@ -1,115 +1,112 @@
-// Tab Switcher
-function switchTab(tabName) {
-  const loginForm = document.getElementById('loginForm');
-  const registerForm = document.getElementById('registerForm');
-  const recoverForm = document.getElementById('recoverForm');
-  const authTabs = document.getElementById('authTabs');
-  const tabs = document.querySelectorAll('.tab-btn');
-  
-  hideAlert();
+document.addEventListener("DOMContentLoaded", () => {
+  const sidebar = document.querySelector("[data-app-sidebar]");
+  const topbar = document.querySelector("[data-app-topbar]");
+  const currentPage = window.location.pathname.split("/").pop() || "index.html";
+  const isHtmlPage = window.location.pathname.includes("/html/");
+  const homePageHref = isHtmlPage ? "../index.html" : "index.html";
+  const pageHref = (page) => page === "index.html"
+    ? homePageHref
+    : isHtmlPage ? page : `html/${page}`;
 
-  // Hide all forms first
-  loginForm.classList.add('hidden');
-  registerForm.classList.add('hidden');
-  recoverForm.classList.add('hidden');
+  if (sidebar) sidebar.id = "appSidebar";
 
-  if (tabName === 'login') {
-    authTabs.classList.remove('hidden');
-    loginForm.classList.remove('hidden');
-    tabs[0].classList.add('active');
-    tabs[1].classList.remove('active');
-  } else if (tabName === 'register') {
-    authTabs.classList.remove('hidden');
-    registerForm.classList.remove('hidden');
-    tabs[0].classList.remove('active');
-    tabs[1].classList.add('active');
-  } else if (tabName === 'recover') {
-    authTabs.classList.add('hidden'); // Hide tabs during recovery view
-    recoverForm.classList.remove('hidden');
+  document.querySelector("[data-admin-content]")?.removeAttribute("hidden");
+
+  const navigation = [
+    { label: "Home", icon: "home", page: "index.html" },
+    { label: "Products", icon: "package", page: "products.html" },
+    { label: "Orders", icon: "shopping-bag", page: "orders.html" },
+    { label: "Settings", icon: "settings", page: "settings.html" },
+    { label: "Account", icon: "user-round", page: "profile.html" }
+  ];
+
+  navigation.push({ label: "Admin", icon: "shield-check", page: "admin.html" });
+
+  if (sidebar) {
+    sidebar.innerHTML = `<nav class="sidebar-nav" aria-label="Main navigation">${navigation.map((item) => {
+      const active = currentPage === item.page || (item.page === "products.html" && currentPage === "product.html");
+      return `<a href="${pageHref(item.page)}" class="nav-item${active ? " active" : ""}"${active ? ' aria-current="page"' : ""}><i data-lucide="${item.icon}" aria-hidden="true"></i><span>${item.label}</span></a>`;
+    }).join("")}<button class="nav-item nav-logout-button" type="button" data-logout><i data-lucide="log-out" aria-hidden="true"></i><span>Log out</span></button></nav>`;
   }
-}
 
-// Alert Helper
-function showAlert(message, type = 'error') {
-  const alertBox = document.getElementById('alertBox');
-  alertBox.textContent = message;
-  alertBox.className = `alert-box ${type}`;
-}
+  if (topbar) {
+    topbar.innerHTML = `<div class="topbar-leading"><button class="menu-toggle" type="button" data-menu-toggle aria-controls="appSidebar" aria-expanded="false" aria-label="Open navigation"><i data-lucide="menu" aria-hidden="true"></i></button><a class="company-name" href="${homePageHref}">Tradspire</a></div><nav class="topbar-actions" aria-label="Account navigation"><a class="icon-btn cart-icon" href="${pageHref("cart.html")}" aria-label="Cart" title="Cart"><i data-lucide="shopping-cart" aria-hidden="true"></i><span class="cart-count" data-cart-count hidden></span></a><a class="icon-btn" href="${pageHref("profile.html")}" aria-label="Profile" title="Profile"><i data-lucide="user" aria-hidden="true"></i></a></nav>`;
+  }
 
-function hideAlert() {
-  const alertBox = document.getElementById('alertBox');
-  alertBox.className = 'alert-box hidden';
-}
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
 
-// 1. LOGIN HANDLER
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  hideAlert();
+  const cartCount = document.querySelector("[data-cart-count]");
+  if (cartCount) {
+    try {
+      const cart = JSON.parse(localStorage.getItem("tradspire-cart") || "[]");
+      const count = cart.reduce((total, item) => total + Number(item.quantity || 0), 0);
+      cartCount.textContent = count > 99 ? "99+" : String(count);
+      cartCount.hidden = count === 0;
+    } catch (error) {
+      cartCount.hidden = true;
+    }
+  }
 
-  const email = document.getElementById('loginEmail').value;
-  const password = document.getElementById('loginPassword').value;
+  const menuToggle = document.querySelector("[data-menu-toggle]");
+  if (sidebar && menuToggle) {
+    const isMobile = () => window.matchMedia("(max-width: 640px)").matches;
+    const backdrop = document.createElement("button");
+    backdrop.className = "sidebar-backdrop";
+    backdrop.type = "button";
+    backdrop.setAttribute("aria-label", "Close navigation");
+    backdrop.hidden = true;
+    document.body.append(backdrop);
 
-  try {
-    const data = await window.TradspireAPI.request('/api/users/login', {
-      method: 'POST',
-      body: { email, password }
+    const setMenuOpen = (open, restoreToggleFocus = false) => {
+      const hidden = isMobile() && !open;
+      sidebar.classList.toggle("is-open", open);
+      sidebar.inert = hidden;
+      sidebar.setAttribute("aria-hidden", String(hidden));
+      backdrop.hidden = !open;
+      document.body.classList.toggle("sidebar-open", open);
+      menuToggle.setAttribute("aria-expanded", String(open));
+      menuToggle.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
+      menuToggle.innerHTML = `<i data-lucide="${open ? "x" : "menu"}" aria-hidden="true"></i>`;
+      if (window.lucide) window.lucide.createIcons();
+      if (open) sidebar.querySelector("a")?.focus();
+      else if (restoreToggleFocus) menuToggle.focus();
+    };
+
+    menuToggle.addEventListener("click", () => {
+      const open = !sidebar.classList.contains("is-open");
+      setMenuOpen(open, !open);
     });
-
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    localStorage.setItem('role', data.user?.role || '');
-
-    showAlert('Login successful! Redirecting...', 'success');
-
-    setTimeout(() => {
-      window.location.replace('../homepage.html');
-    }, 1000);
-
-  } catch (err) {
-    showAlert(err.message, 'error');
-  }
-});
-
-// 2. REGISTER HANDLER
-document.getElementById('registerForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  hideAlert();
-
-  const name = document.getElementById('regName').value;
-  const email = document.getElementById('regEmail').value;
-  const password = document.getElementById('regPassword').value;
-
-  try {
-    const data = await window.TradspireAPI.request('/api/users', {
-      method: 'POST',
-      body: { name, email, password }
+    backdrop.addEventListener("click", () => setMenuOpen(false, true));
+    sidebar.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => setMenuOpen(false));
     });
-
-    showAlert(data.message || 'Account created successfully.', 'success');
-    document.getElementById('registerForm').reset();
-
-  } catch (err) {
-    showAlert(err.message, 'error');
-  }
-});
-
-// 3. RECOVER PASSWORD HANDLER
-document.getElementById('recoverForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  hideAlert();
-
-  const email = document.getElementById('recoverEmail').value;
-
-  try {
-    const data = await window.TradspireAPI.request('/api/users/forgot-password', {
-      method: 'POST',
-      body: { email }
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && sidebar.classList.contains("is-open")) {
+        setMenuOpen(false, true);
+      }
     });
-
-    showAlert(data.message || 'Password reset link sent.', 'success');
-    document.getElementById('recoverForm').reset();
-
-  } catch (err) {
-    showAlert(err.message, 'error');
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 640) setMenuOpen(false);
+    });
+    setMenuOpen(false);
   }
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("role");
+    window.location.replace(isHtmlPage ? "login.html" : "html/login.html");
+  };
+
+  document.querySelectorAll("[data-logout], #logoutButton").forEach((button) => {
+    button.addEventListener("click", logout);
+  });
+
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const name = document.getElementById("profileName");
+  const email = document.getElementById("profileEmail");
+  if (name) name.textContent = user.name || "Not provided";
+  if (email) email.textContent = user.email || "Not provided";
 });

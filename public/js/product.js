@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     title.textContent = message;
     const link = document.createElement('a');
     link.className = 'product-link';
-    link.href = 'homepage.html';
+    link.href = '../index.html';
     link.textContent = 'Back to featured products';
     content.append(eyebrow, title, link);
     container.replaceChildren(content);
