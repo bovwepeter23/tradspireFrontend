@@ -11,9 +11,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   const heading = document.querySelector('[data-product-form-heading]');
   const submitButton = form.querySelector('[type="submit"]');
   const cancelButton = document.querySelector('[data-cancel-edit]');
+  const listingTypeInputs = [...form.querySelectorAll('input[name="listingType"]')];
+  const priceInput = form.elements.namedItem('price');
+  const rentPriceInput = form.elements.namedItem('rentPricePerDay');
+  const subImagesInput = form.elements.namedItem('subImages');
+  const carouselForm = document.getElementById('carouselForm');
+  const carouselList = document.querySelector('[data-carousel-list]');
+  const carouselCount = document.querySelector('[data-carousel-count]');
+  const carouselHeading = document.querySelector('[data-carousel-form-heading]');
+  const carouselSubmit = carouselForm?.querySelector('[type="submit"]');
+  const carouselCancel = document.querySelector('[data-carousel-cancel]');
+  const carouselImageInput = carouselForm?.elements.namedItem('image');
+  const carouselImagePreview = document.querySelector('[data-carousel-image-preview]');
   let products = [];
   let editingId = null;
   let previewUrl = null;
+  let carouselItems = [];
+  let editingCarouselId = null;
+  let carouselPreviewUrl = null;
 
   const setMessage = (text, isError = false) => {
     message.textContent = text;
@@ -25,6 +40,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     element.className = className;
     element.textContent = text;
     return element;
+  };
+
+  const selectedListingTypes = () => listingTypeInputs.filter((input) => input.checked).map((input) => input.value);
+
+  const syncListingPrices = () => {
+    const types = selectedListingTypes();
+    priceInput.required = types.includes('buy');
+    rentPriceInput.required = types.includes('rent');
+    priceInput.disabled = !types.includes('buy');
+    rentPriceInput.disabled = !types.includes('rent');
+  };
+
+  const categoriesFor = (product) => Array.isArray(product.categories)
+    ? product.categories.join(', ')
+    : product.categories || product.category || '';
+
+  const listingTypesFor = (product) => {
+    if (Array.isArray(product.listingType)) return product.listingType;
+    if (Array.isArray(product.listingTypes)) return product.listingTypes;
+    if (product.listingType) return [product.listingType];
+    return product.isRentable ? ['rent'] : ['buy'];
   };
 
   const renderProducts = () => {
@@ -46,8 +82,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       details.className = 'admin-product-info';
       details.append(
         makeText('h3', '', product.name),
-        makeText('p', 'admin-product-meta', `${product.category} · ${product.origin}`),
-        makeText('p', 'admin-product-price', `$${Number(product.price).toFixed(2)}`)
+        makeText('p', 'admin-product-meta', `${categoriesFor(product)} · ${product.origin}`),
+        makeText('p', 'admin-product-price', [
+          product.price != null ? `Buy $${Number(product.price).toFixed(2)}` : '',
+          product.rentPricePerDay != null ? `Rent $${Number(product.rentPricePerDay).toFixed(2)}/day` : ''
+        ].filter(Boolean).join(' · '))
       );
 
       const actions = document.createElement('div');
@@ -88,9 +127,72 @@ document.addEventListener('DOMContentLoaded', async () => {
     cancelButton.hidden = true;
     imagePreview.hidden = true;
     imagePreview.removeAttribute('src');
+    subImagesInput.value = '';
+    listingTypeInputs.forEach((input) => { input.checked = input.value === 'buy'; });
+    syncListingPrices();
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     previewUrl = null;
   };
+
+  const renderCarousel = () => {
+    carouselCount.textContent = String(carouselItems.length);
+    if (!carouselItems.length) {
+      carouselList.replaceChildren(makeText('p', 'empty-state', 'No carousel images yet.'));
+      return;
+    }
+
+    carouselList.replaceChildren(...carouselItems.map((item) => {
+      const row = document.createElement('article');
+      row.className = 'admin-product-row';
+      const image = document.createElement('img');
+      image.className = 'admin-product-image';
+      image.src = item.image;
+      image.alt = item.imageAlt || item.title;
+      const details = document.createElement('div');
+      details.className = 'admin-product-info';
+      details.append(makeText('h3', '', item.title), makeText('p', 'admin-product-meta', item.productId || 'Homepage carousel'));
+      const actions = document.createElement('div');
+      actions.className = 'admin-product-actions';
+      const edit = makeText('button', 'admin-action', 'Edit');
+      edit.type = 'button';
+      edit.dataset.editCarousel = item._id;
+      const remove = makeText('button', 'admin-action admin-delete', 'Delete');
+      remove.type = 'button';
+      remove.dataset.deleteCarousel = item._id;
+      actions.append(edit, remove);
+      row.append(image, details, actions);
+      return row;
+    }));
+  };
+
+  const loadCarousel = async () => {
+    try {
+      const response = await window.TradspireAPI.request('/api/carousel?limit=100');
+      carouselItems = response.items || response.carouselImages || response.carousel || [];
+      renderCarousel();
+    } catch (error) {
+      carouselList.replaceChildren(makeText('p', 'empty-state', error.message));
+    }
+  };
+
+  const resetCarouselForm = () => {
+    carouselForm.reset();
+    editingCarouselId = null;
+    carouselImageInput.required = true;
+    carouselSubmit.textContent = 'Add carousel image';
+    carouselHeading.textContent = 'Add carousel image';
+    carouselCancel.hidden = true;
+    carouselImagePreview.hidden = true;
+    carouselImagePreview.removeAttribute('src');
+    if (carouselPreviewUrl) URL.revokeObjectURL(carouselPreviewUrl);
+    carouselPreviewUrl = null;
+  };
+
+  listingTypeInputs.forEach((input) => input.addEventListener('change', () => {
+    if (!selectedListingTypes().length) input.checked = true;
+    syncListingPrices();
+  }));
+  syncListingPrices();
 
   imageInput.addEventListener('change', () => {
     const file = imageInput.files[0];
@@ -115,7 +217,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const body = new FormData(form);
+    const categories = form.elements.namedItem('categories').value
+      .split(',')
+      .map((category) => category.trim())
+      .filter(Boolean);
+    body.delete('categories');
+    categories.forEach((category) => body.append('categories', category));
     if (!imageInput.files.length) body.delete('image');
+    if (!subImagesInput.files.length) body.delete('subImages');
     submitButton.disabled = true;
     setMessage(editingId ? 'Saving product changes...' : 'Creating product...');
 
@@ -141,8 +250,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!product) return;
       editingId = product._id;
       form.elements.namedItem('name').value = product.name;
-      form.elements.namedItem('category').value = product.category;
-      form.elements.namedItem('price').value = product.price;
+      form.elements.namedItem('categories').value = categoriesFor(product);
+      listingTypeInputs.forEach((input) => { input.checked = listingTypesFor(product).includes(input.value); });
+      form.elements.namedItem('price').value = product.price ?? '';
+      form.elements.namedItem('rentPricePerDay').value = product.rentPricePerDay ?? '';
+      syncListingPrices();
       form.elements.namedItem('origin').value = product.origin;
       form.elements.namedItem('description').value = product.description;
       form.elements.namedItem('imageAlt').value = product.imageAlt || product.name;
@@ -176,5 +288,74 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  carouselImageInput?.addEventListener('change', () => {
+    const file = carouselImageInput.files[0];
+    if (carouselPreviewUrl) URL.revokeObjectURL(carouselPreviewUrl);
+    carouselPreviewUrl = file ? URL.createObjectURL(file) : null;
+    carouselImagePreview.hidden = !carouselPreviewUrl;
+    if (carouselPreviewUrl) carouselImagePreview.src = carouselPreviewUrl;
+  });
+
+  carouselCancel?.addEventListener('click', () => {
+    resetCarouselForm();
+    setMessage('Carousel edit cancelled.');
+  });
+
+  carouselForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const body = new FormData(carouselForm);
+    if (!carouselImageInput.files.length) body.delete('image');
+    carouselSubmit.disabled = true;
+    setMessage(editingCarouselId ? 'Saving carousel image...' : 'Adding carousel image...');
+    try {
+      await window.TradspireAPI.request(
+        editingCarouselId ? `/api/carousel/${encodeURIComponent(editingCarouselId)}` : '/api/carousel',
+        { method: editingCarouselId ? 'PUT' : 'POST', token, body }
+      );
+      resetCarouselForm();
+      setMessage('Carousel image saved.');
+      await loadCarousel();
+    } catch (error) {
+      setMessage(error.message, true);
+    } finally {
+      carouselSubmit.disabled = false;
+    }
+  });
+
+  carouselList?.addEventListener('click', async (event) => {
+    const editButton = event.target.closest('[data-edit-carousel]');
+    if (editButton) {
+      const item = carouselItems.find((entry) => entry._id === editButton.dataset.editCarousel);
+      if (!item) return;
+      editingCarouselId = item._id;
+      carouselForm.elements.namedItem('title').value = item.title || '';
+      carouselForm.elements.namedItem('productId').value = item.productId || '';
+      carouselForm.elements.namedItem('imageAlt').value = item.imageAlt || item.title || '';
+      carouselImageInput.value = '';
+      carouselImageInput.required = false;
+      carouselHeading.textContent = 'Edit carousel image';
+      carouselSubmit.textContent = 'Save carousel image';
+      carouselCancel.hidden = false;
+      carouselImagePreview.hidden = true;
+      carouselForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    const deleteButton = event.target.closest('[data-delete-carousel]');
+    if (!deleteButton) return;
+    const item = carouselItems.find((entry) => entry._id === deleteButton.dataset.deleteCarousel);
+    if (!item || !window.confirm(`Delete ${item.title}?`)) return;
+    deleteButton.disabled = true;
+    try {
+      await window.TradspireAPI.request(`/api/carousel/${encodeURIComponent(item._id)}`, { method: 'DELETE', token });
+      setMessage('Carousel image deleted.');
+      await loadCarousel();
+    } catch (error) {
+      setMessage(error.message, true);
+      deleteButton.disabled = false;
+    }
+  });
+
   await loadProducts();
+  await loadCarousel();
 });

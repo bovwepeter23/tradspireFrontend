@@ -19,11 +19,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let products;
   try {
-    const response = await window.TradspireAPI.request('/api/products?limit=12');
-    products = response.products || [];
+    const carouselResponse = await window.TradspireAPI.request('/api/carousel?limit=12');
+    const carouselItems = carouselResponse.items || carouselResponse.carouselImages || carouselResponse.carousel || [];
+    if (carouselItems.length) {
+      products = carouselItems.map((item) => ({
+        ...item,
+        _id: item.productId || item._id,
+        name: item.title || item.name,
+        imageAlt: item.imageAlt || item.title || item.name,
+        categories: item.categories || item.category || '',
+        origin: item.origin || '',
+        description: item.description || ''
+      }));
+    } else {
+      const response = await window.TradspireAPI.request('/api/products?limit=12');
+      products = response.products || [];
+    }
   } catch (error) {
-    showMessage(`Products are unavailable right now. ${error.message}`);
-    return;
+    try {
+      const response = await window.TradspireAPI.request('/api/products?limit=12');
+      products = response.products || [];
+    } catch (fallbackError) {
+      showMessage(`Products are unavailable right now. ${fallbackError.message}`);
+      return;
+    }
   }
 
   if (!products.length) {
@@ -39,6 +58,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     element.textContent = text;
     return element;
   };
+
+  const categoriesFor = (product) => Array.isArray(product.categories)
+    ? product.categories.join(' · ')
+    : product.categories || product.category || '';
+
+  const pricesFor = (product) => [
+    product.price != null ? `Buy $${Number(product.price).toFixed(2)}` : '',
+    product.rentPricePerDay != null ? `Rent $${Number(product.rentPricePerDay).toFixed(2)}/day` : ''
+  ].filter(Boolean).join(' · ');
 
   const render = () => {
     const product = products[activeIndex];
@@ -57,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const copy = document.createElement('div');
     copy.className = 'carousel-copy';
     copy.append(
-      makeText('p', 'product-category', product.category),
+      makeText('p', 'product-category', categoriesFor(product)),
       makeText('h3', '', product.name),
       makeText('p', 'carousel-origin', product.origin),
       makeText('p', 'carousel-description', product.description)
@@ -65,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const purchase = document.createElement('div');
     purchase.className = 'carousel-purchase';
-    purchase.append(makeText('span', 'product-price', `$${Number(product.price).toFixed(2)}`));
+    purchase.append(makeText('span', 'product-price', pricesFor(product)));
     const productLink = document.createElement('a');
     productLink.className = 'product-link';
     productLink.href = productUrl;

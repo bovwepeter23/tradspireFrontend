@@ -21,12 +21,22 @@
           <h2 data-product-form-heading>Add product</h2>
           <label for="productName">Product name</label>
           <input id="productName" name="name" type="text" maxlength="120" required>
-          <label for="productCategory">Category</label>
-          <input id="productCategory" name="category" type="text" maxlength="80" required>
+          <label for="productCategories">Categories</label>
+          <input id="productCategories" name="categories" type="text" maxlength="240" placeholder="Jewelry, Handmade, Gifts" required>
+          <p class="admin-form-hint">Separate multiple categories with commas.</p>
+          <fieldset class="admin-choice-group">
+            <legend>Listing options</legend>
+            <label><input type="checkbox" name="listingType" value="buy" checked> Buy</label>
+            <label><input type="checkbox" name="listingType" value="rent"> Rent</label>
+          </fieldset>
           <div class="admin-form-row">
             <div>
               <label for="productPrice">Price (USD)</label>
-              <input id="productPrice" name="price" type="number" min="0" step="0.01" required>
+              <input id="productPrice" name="price" type="number" min="0" step="0.01">
+            </div>
+            <div>
+              <label for="productRentPrice">Rent per day (USD)</label>
+              <input id="productRentPrice" name="rentPricePerDay" type="number" min="0" step="0.01">
             </div>
             <div>
               <label for="productOrigin">Origin</label>
@@ -37,9 +47,11 @@
           <textarea id="productDescription" name="description" rows="4" maxlength="2000" required></textarea>
           <label for="productImageAlt">Image description</label>
           <input id="productImageAlt" name="imageAlt" type="text" maxlength="180">
-          <label for="productImage">Product image</label>
+          <label for="productImage">Main image</label>
           <input id="productImage" name="image" type="file" accept="image/*" required>
-          <p class="admin-form-hint">Image files up to 4 MB.</p>
+          <label for="productSubImages">Sub-images</label>
+          <input id="productSubImages" name="subImages" type="file" accept="image/*" multiple>
+          <p class="admin-form-hint">Images up to 4 MB each. The main image is used on product cards.</p>
           <img class="admin-image-preview" data-image-preview alt="Selected product preview" hidden>
           <div class="admin-form-actions">
             <button class="text-button admin-submit" type="submit">Create product</button>
@@ -56,6 +68,34 @@
           </div>
         </section>
       </div>
+      <section class="admin-carousel" aria-labelledby="carouselTitle">
+        <div class="admin-inventory-heading">
+          <div>
+            <p class="eyebrow">Homepage feature</p>
+            <h2 id="carouselTitle">Carousel images</h2>
+          </div>
+          <span class="inventory-count" data-carousel-count>0</span>
+        </div>
+        <form class="admin-form admin-carousel-form" id="carouselForm">
+          <h3 data-carousel-form-heading>Add carousel image</h3>
+          <label for="carouselTitleInput">Title</label>
+          <input id="carouselTitleInput" name="title" type="text" maxlength="120" required>
+          <label for="carouselLink">Product link (optional)</label>
+          <input id="carouselLink" name="productId" type="text" placeholder="Product ID">
+          <label for="carouselImageAlt">Image description</label>
+          <input id="carouselImageAlt" name="imageAlt" type="text" maxlength="180">
+          <label for="carouselImage">Image</label>
+          <input id="carouselImage" name="image" type="file" accept="image/*" required>
+          <img class="admin-image-preview" data-carousel-image-preview alt="Selected carousel preview" hidden>
+          <div class="admin-form-actions">
+            <button class="text-button admin-submit" type="submit">Add carousel image</button>
+            <button class="admin-cancel" data-carousel-cancel type="button" hidden>Cancel edit</button>
+          </div>
+        </form>
+        <div class="admin-carousel-list" data-carousel-list>
+          <p class="empty-state">Loading carousel images...</p>
+        </div>
+      </section>
     </main>
   </div>
   <script src="../js/api.js"></script>

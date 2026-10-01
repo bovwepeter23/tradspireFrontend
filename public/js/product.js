@@ -24,6 +24,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
+  const categoriesFor = (product) => Array.isArray(product.categories)
+    ? product.categories.join(' · ')
+    : product.categories || product.category || '';
+
+  const imageUrlFor = (image) => typeof image === 'string' ? image : image?.url || image?.image;
+
+  const pricesFor = (product) => [
+    product.price != null ? `Buy $${Number(product.price).toFixed(2)}` : '',
+    product.rentPricePerDay != null ? `Rent $${Number(product.rentPricePerDay).toFixed(2)}/day` : ''
+  ].filter(Boolean).join(' · ');
+
   try {
     const response = await window.TradspireAPI.request(`/api/products/${encodeURIComponent(productId)}`);
     const product = response.product;
@@ -39,12 +50,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     image.src = product.image;
     image.alt = product.imageAlt || product.name;
     imageWrap.append(image);
+    const subImages = Array.isArray(product.subImages) ? product.subImages : [];
+    if (subImages.length) {
+      const gallery = document.createElement('div');
+      gallery.className = 'product-detail-gallery';
+      subImages.forEach((subImage) => {
+        const url = imageUrlFor(subImage);
+        if (!url) return;
+        const thumbnail = document.createElement('img');
+        thumbnail.className = 'product-detail-thumbnail';
+        thumbnail.src = url;
+        thumbnail.alt = product.imageAlt || product.name;
+        gallery.append(thumbnail);
+      });
+      imageWrap.append(gallery);
+    }
 
     const copy = document.createElement('div');
     copy.className = 'product-detail-copy';
     const category = document.createElement('p');
     category.className = 'product-category';
-    category.textContent = product.category;
+    category.textContent = categoriesFor(product);
     const title = document.createElement('h1');
     title.textContent = product.name;
     const origin = document.createElement('p');
@@ -55,7 +81,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     description.textContent = product.description;
     const price = document.createElement('p');
     price.className = 'product-detail-price';
-    price.textContent = `$${Number(product.price).toFixed(2)}`;
+    price.textContent = pricesFor(product);
     const purchase = document.createElement('button');
     purchase.className = 'text-button';
     purchase.type = 'button';
