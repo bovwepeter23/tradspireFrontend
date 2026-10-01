@@ -57,8 +57,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     : product.categories || product.category || '';
 
   const pricesFor = (product) => [
-    product.price != null ? `Buy $${Number(product.price).toFixed(2)}` : '',
-    product.rentPricePerDay != null ? `Rent $${Number(product.rentPricePerDay).toFixed(2)}/day` : ''
+    product.price != null ? `Buy ₦${Number(product.price).toFixed(2)}` : '',
+    product.rentPricePerDay != null ? `Rent ₦${Number(product.rentPricePerDay).toFixed(2)}/day` : ''
   ].filter(Boolean).join(' · ');
 
   const render = () => {

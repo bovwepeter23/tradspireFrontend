@@ -106,8 +106,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const mode = document.createElement('select');
     mode.className = 'product-mode';
     mode.setAttribute('aria-label', 'Purchase type');
-    if (types.includes('buy') && product.price != null) mode.append(new Option(`Buy for $${Number(product.price).toFixed(2)}`, 'buy'));
-    if (types.includes('rent') && product.rentPricePerDay != null) mode.append(new Option(`Rent for $${Number(product.rentPricePerDay).toFixed(2)} per day`, 'rent'));
+    if (types.includes('buy') && product.price != null) mode.append(new Option(`Buy for ₦${Number(product.price).toFixed(2)}`, 'buy'));
+    if (types.includes('rent') && product.rentPricePerDay != null) mode.append(new Option(`Rent for ₦${Number(product.rentPricePerDay).toFixed(2)} per day`, 'rent'));
 
     const quantityLabel = document.createElement('label');
     quantityLabel.textContent = 'Quantity';

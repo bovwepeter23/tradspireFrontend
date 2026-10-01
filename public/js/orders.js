@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     element.textContent = text;
     return element;
   };
-  const money = (amount) => `$${Number(amount || 0).toFixed(2)}`;
+  const money = (amount) => `₦${Number(amount || 0).toFixed(2)}`;
   const statusLabel = (status) => status.charAt(0).toUpperCase() + status.slice(1);
 
   const renderOrders = (orders) => {

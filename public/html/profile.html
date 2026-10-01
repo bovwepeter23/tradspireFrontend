@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profile | Tradspire</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="stylesheet" href="../css/index.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -13,60 +14,29 @@
     <aside class="sidebar" data-app-sidebar></aside>
     <main class="main-content">
       <p class="eyebrow">Your account</p>
-      <h1>Profile</h1>
-      <p class="page-description">Account details, delivery address, and security.</p>
+      <h1>Account</h1>
+      <p class="page-description">Your account and delivery details.</p>
       <p class="account-message" data-profile-message role="status" aria-live="polite"></p>
-      <form class="account-form" id="profileForm">
+      <section>
         <h2>Personal details</h2>
-        <label for="profileName">Full name</label>
-        <input id="profileName" name="name" type="text" autocomplete="name" maxlength="120" required>
-        <label for="profileEmail">Email address</label>
-        <input id="profileEmail" name="email" type="email" autocomplete="email" readonly>
+        <dl class="account-details">
+          <dt>Full name</dt><dd data-account-field="name">Not provided</dd>
+          <dt>Email address</dt><dd data-account-field="email">Not provided</dd>
+        </dl>
+      </section>
+      <section>
         <h2>Delivery address</h2>
-        <div class="account-form-grid">
-          <div>
-            <label for="addressFullName">Recipient name</label>
-            <input id="addressFullName" name="fullName" type="text" autocomplete="shipping name" maxlength="120" required>
-          </div>
-          <div>
-            <label for="addressPhone">Phone number</label>
-            <input id="addressPhone" name="phone" type="tel" autocomplete="shipping tel" maxlength="40" required>
-          </div>
-        </div>
-        <label for="addressLine1">Street address</label>
-        <input id="addressLine1" name="addressLine1" type="text" autocomplete="shipping address-line1" maxlength="160" required>
-        <label for="addressLine2">Apartment, suite, etc. (optional)</label>
-        <input id="addressLine2" name="addressLine2" type="text" autocomplete="shipping address-line2" maxlength="160">
-        <div class="account-form-grid account-form-grid-four">
-          <div>
-            <label for="addressCity">City</label>
-            <input id="addressCity" name="city" type="text" autocomplete="shipping address-level2" maxlength="100" required>
-          </div>
-          <div>
-            <label for="addressRegion">State / region</label>
-            <input id="addressRegion" name="region" type="text" autocomplete="shipping address-level1" maxlength="100" required>
-          </div>
-          <div>
-            <label for="addressPostalCode">Postal code</label>
-            <input id="addressPostalCode" name="postalCode" type="text" autocomplete="shipping postal-code" maxlength="24" required>
-          </div>
-          <div>
-            <label for="addressCountry">Country</label>
-            <input id="addressCountry" name="country" type="text" autocomplete="shipping country-name" maxlength="80" required>
-          </div>
-        </div>
-        <button class="text-button" type="submit">Save profile</button>
-      </form>
-      <form class="account-form" id="passwordForm">
-        <h2>Change password</h2>
-        <label for="currentPassword">Current password</label>
-        <input id="currentPassword" name="currentPassword" type="password" autocomplete="current-password" required>
-        <label for="newPassword">New password</label>
-        <input id="newPassword" name="newPassword" type="password" autocomplete="new-password" minlength="8" required>
-        <label for="confirmPassword">Confirm new password</label>
-        <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required>
-        <button class="text-button" type="submit">Update password</button>
-      </form>
+        <dl class="account-details">
+          <dt>Recipient name</dt><dd data-account-field="deliveryAddress.fullName">Not provided</dd>
+          <dt>Phone number</dt><dd data-account-field="deliveryAddress.phone">Not provided</dd>
+          <dt>Street address</dt><dd data-account-field="deliveryAddress.addressLine1">Not provided</dd>
+          <dt>Apartment, suite, etc.</dt><dd data-account-field="deliveryAddress.addressLine2">Not provided</dd>
+          <dt>City</dt><dd data-account-field="deliveryAddress.city">Not provided</dd>
+          <dt>State / region</dt><dd data-account-field="deliveryAddress.region">Not provided</dd>
+          <dt>Postal code</dt><dd data-account-field="deliveryAddress.postalCode">Not provided</dd>
+          <dt>Country</dt><dd data-account-field="deliveryAddress.country">Not provided</dd>
+        </dl>
+      </section>
     </main>
   </div>
   <script src="../js/api.js"></script>

@@ -116,8 +116,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         makeText('h3', '', product.name),
         makeText('p', 'admin-product-meta', `${categoriesFor(product)} · ${product.origin}`),
         makeText('p', 'admin-product-price', [
-          product.price != null ? `Buy $${Number(product.price).toFixed(2)}` : '',
-          product.rentPricePerDay != null ? `Rent $${Number(product.rentPricePerDay).toFixed(2)}/day` : ''
+          product.price != null ? `Buy ₦${Number(product.price).toFixed(2)}` : '',
+          product.rentPricePerDay != null ? `Rent ₦${Number(product.rentPricePerDay).toFixed(2)}/day` : ''
         ].filter(Boolean).join(' · '))
       );
 
@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
       status.value = order.status;
       status.dataset.previousStatus = order.status;
-      row.append(summary, items, destination, makeText('strong', 'admin-product-price', `$${Number(order.total).toFixed(2)}`), status);
+      row.append(summary, items, destination, makeText('strong', 'admin-product-price', `₦${Number(order.total).toFixed(2)}`), status);
       return row;
     }));
   };

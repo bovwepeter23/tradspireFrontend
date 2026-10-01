@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     element.textContent = text;
     return element;
   };
-  const money = (amount) => `$${Number(amount || 0).toFixed(2)}`;
+  const money = (amount) => `₦${Number(amount || 0).toFixed(2)}`;
   const readCart = () => {
     try {
       const cart = JSON.parse(localStorage.getItem('tradspire-cart') || '[]');
