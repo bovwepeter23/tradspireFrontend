@@ -143,6 +143,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const rotateCarousel = window.setInterval(() => {
     activeIndex = (activeIndex + 1) % products.length;
     render();
-  }, 35000);
+  }, 20000);
   window.addEventListener('beforeunload', () => window.clearInterval(rotateCarousel), { once: true });
 });
