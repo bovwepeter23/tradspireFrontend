@@ -18,12 +18,12 @@
       <p class="page-description">Manage products and homepage carousel images.</p>
       <p class="admin-message" data-admin-message role="status"></p>
       <div class="admin-tabs" role="tablist" aria-label="Admin sections">
-        <button class="admin-tab is-active" id="productsTab" type="button" role="tab" aria-selected="true" aria-controls="productsDashboard" tabindex="0">Products</button>
+        <button class="admin-tab is-active" id="newProductTab" type="button" role="tab" aria-selected="true" aria-controls="productForm" tabindex="0">New Product</button>
+        <button class="admin-tab" id="inventoryTab" type="button" role="tab" aria-selected="false" aria-controls="inventoryPanel" tabindex="-1">Inventory</button>
         <button class="admin-tab" id="carouselTab" type="button" role="tab" aria-selected="false" aria-controls="carouselPanel" tabindex="-1">Carousel</button>
         <button class="admin-tab" id="ordersTab" type="button" role="tab" aria-selected="false" aria-controls="ordersPanel" tabindex="-1">Orders</button>
       </div>
-      <div class="admin-dashboard admin-panel" id="productsDashboard" role="tabpanel" aria-labelledby="productsTab">
-        <form class="admin-form" id="productForm">
+      <form class="admin-form admin-panel admin-product-form" id="productForm" role="tabpanel" aria-labelledby="newProductTab">
           <h2 data-product-form-heading>Add product</h2>
           <label for="productName">Product name</label>
           <input id="productName" name="name" type="text" maxlength="120" required>
@@ -63,17 +63,16 @@
             <button class="text-button admin-submit" type="submit">Create product</button>
             <button class="admin-cancel" data-cancel-edit type="button" hidden>Cancel edit</button>
           </div>
-        </form>
-        <section class="admin-inventory" aria-labelledby="inventoryTitle">
-          <div class="admin-inventory-heading">
-            <h2 id="inventoryTitle">Inventory</h2>
-            <span class="inventory-count" data-product-count>0</span>
-          </div>
-          <div class="admin-product-list" data-admin-product-list>
-            <p class="empty-state">Loading inventory...</p>
-          </div>
-        </section>
-      </div>
+      </form>
+      <section class="admin-inventory admin-panel" id="inventoryPanel" role="tabpanel" aria-labelledby="inventoryTab" hidden>
+        <div class="admin-inventory-heading">
+          <h2 id="inventoryTitle">Inventory</h2>
+          <span class="inventory-count" data-product-count>0</span>
+        </div>
+        <div class="admin-product-list" data-admin-product-list>
+          <p class="empty-state">Loading inventory...</p>
+        </div>
+      </section>
       <section class="admin-carousel admin-panel" id="carouselPanel" role="tabpanel" aria-labelledby="carouselTab" hidden>
         <div class="admin-inventory-heading">
           <div>

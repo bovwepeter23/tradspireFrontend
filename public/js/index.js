@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const navigation = [
     { label: "Home", icon: "home", page: "index.html" },
-    { label: "Products", icon: "package", page: "products.html" },
+    { label: "Cart", icon: "shopping-cart", page: "cart.html" },
     { label: "Orders", icon: "shopping-bag", page: "orders.html" },
     { label: "Settings", icon: "settings", page: "settings.html" },
     { label: "Account", icon: "user-round", page: "profile.html" }
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (topbar) {
-    topbar.innerHTML = `<div class="topbar-leading"><button class="menu-toggle" type="button" data-menu-toggle aria-controls="appSidebar" aria-expanded="false" aria-label="Open navigation"><i data-lucide="menu" aria-hidden="true"></i></button><a class="company-name" href="${homePageHref}">Tradspire</a></div><nav class="topbar-actions" aria-label="Account navigation"><a class="icon-btn cart-icon" href="${pageHref("cart.html")}" aria-label="Cart" title="Cart"><i data-lucide="shopping-cart" aria-hidden="true"></i><span class="cart-count" data-cart-count hidden></span></a><a class="icon-btn" href="${pageHref("profile.html")}" aria-label="Profile" title="Profile"><i data-lucide="user" aria-hidden="true"></i></a></nav>`;
+    topbar.innerHTML = `<div class="topbar-leading"><button class="menu-toggle" type="button" data-menu-toggle aria-controls="appSidebar" aria-expanded="false" aria-label="Open navigation"><i data-lucide="menu" aria-hidden="true"></i></button><a class="company-name" href="${homePageHref}">Tradspire</a></div><nav class="topbar-actions" aria-label="Account navigation"><a class="icon-btn cart-icon" href="${pageHref("cart.html")}" aria-label="Cart" title="Cart"><i data-lucide="shopping-cart" aria-hidden="true"></i><span class="cart-count" data-cart-count hidden></span></a><a class="icon-btn" href="${pageHref("profile.html")}" aria-label="Account" title="Account"><i data-lucide="user" aria-hidden="true"></i></a></nav>`;
   }
 
   if (window.lucide) {

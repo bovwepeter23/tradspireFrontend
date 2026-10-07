@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     const response = await window.TradspireAPI.request('/api/products');
     const allProducts = response.products || [];
-    const products = grid.hasAttribute('data-home-product-grid') ? allProducts.slice(0, 2) : allProducts;
+    const products = allProducts;
     if (!products.length) {
       grid.textContent = 'No products are available yet. Please check back soon.';
       grid.classList.add('product-grid-empty');

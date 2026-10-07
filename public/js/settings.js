@@ -11,6 +11,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     message.classList.toggle('is-error', isError);
   };
 
+  [profileForm, passwordForm].forEach((form) => {
+    form.addEventListener('invalid', (event) => {
+      event.target.closest('.settings-disclosure')?.setAttribute('open', '');
+    }, true);
+  });
+
   const storeUser = (user) => {
     let previous = {};
     try {

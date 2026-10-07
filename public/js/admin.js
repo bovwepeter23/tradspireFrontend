@@ -352,6 +352,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       submitButton.textContent = 'Save changes';
       cancelButton.hidden = false;
       imagePreview.hidden = true;
+      selectAdminTab(document.getElementById('newProductTab'));
       form.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setMessage(`Editing ${product.name}. Choose a new image only if you want to replace it.`);
       return;
