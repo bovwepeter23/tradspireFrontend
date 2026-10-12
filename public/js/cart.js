@@ -2,10 +2,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const itemsContainer = document.querySelector('[data-cart-items]');
   const totalElement = document.querySelector('[data-cart-total]');
   const message = document.querySelector('[data-cart-message]');
-  const checkoutForm = document.getElementById('checkoutForm');
-  if (!itemsContainer || !totalElement || !message || !checkoutForm) return;
+  const placeOrderButton = document.getElementById('placeOrderButton');
+  if (!itemsContainer || !message || !placeOrderButton) return;
 
   const token = localStorage.getItem('token');
+  const requiredAddressFields = ['fullName', 'phone', 'addressLine1', 'city', 'region', 'postalCode', 'country'];
   const makeText = (tagName, className, text) => {
     const element = document.createElement(tagName);
     element.className = className;
@@ -23,6 +24,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   const writeCart = (cart) => localStorage.setItem('tradspire-cart', JSON.stringify(cart));
   let cart = readCart();
+  let deliveryAddress = null;
+
+  const hasDeliveryAddress = () => requiredAddressFields.every((field) => String(deliveryAddress?.[field] || '').trim());
 
   const updateCartCount = () => {
     const badge = document.querySelector('[data-cart-count]');
@@ -64,18 +68,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         return row;
       }));
     }
-    totalElement.textContent = money(cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity) * (item.purchaseType === 'rent' ? Number(item.rentalDays || 1) : 1), 0));
+    if (totalElement) {
+      totalElement.textContent = money(cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity) * (item.purchaseType === 'rent' ? Number(item.rentalDays || 1) : 1), 0));
+    }
     writeCart(cart);
     updateCartCount();
-    const submit = checkoutForm.querySelector('[type="submit"]');
-    submit.disabled = cart.length === 0 || !token;
-  };
-
-  const fillAddress = (address) => {
-    Object.entries(address || {}).forEach(([field, value]) => {
-      const input = checkoutForm.elements.namedItem(field);
-      if (input) input.value = value || '';
-    });
+    placeOrderButton.disabled = cart.length === 0 || !token || !hasDeliveryAddress();
   };
 
   itemsContainer.addEventListener('change', (event) => {
@@ -101,30 +99,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderCart();
   });
 
+  renderCart();
+
   if (!token) {
-    checkoutForm.hidden = true;
+    placeOrderButton.hidden = true;
     document.querySelector('[data-cart-login]').hidden = false;
     message.textContent = 'Sign in to place an order.';
   } else {
     try {
       const response = await window.TradspireAPI.request('/api/users/profile', { token });
-      fillAddress(response.user?.deliveryAddress);
-      if (!response.user?.deliveryAddress?.addressLine1) {
-        message.textContent = 'Add a delivery address to your profile or enter it here.';
+      deliveryAddress = response.user?.deliveryAddress || null;
+      if (!hasDeliveryAddress()) {
+        message.textContent = 'Add a complete delivery address in Settings before placing an order.';
       }
+      renderCart();
     } catch (error) {
       message.textContent = error.message || 'Your saved delivery address could not be loaded.';
     }
   }
 
-  checkoutForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    if (!cart.length || !token) return;
-    const submit = checkoutForm.querySelector('[type="submit"]');
-    const formData = new FormData(checkoutForm);
-    const deliveryAddress = Object.fromEntries(
-      ['fullName', 'phone', 'addressLine1', 'addressLine2', 'city', 'region', 'postalCode', 'country']
-        .map((field) => [field, formData.get(field).trim()])
+  placeOrderButton.addEventListener('click', async () => {
+    if (!cart.length || !token || !hasDeliveryAddress()) return;
+    const submit = placeOrderButton;
+    const orderAddress = Object.fromEntries(
+      [...requiredAddressFields, 'addressLine2']
+        .map((field) => [field, String(deliveryAddress[field] || '').trim()])
     );
     submit.disabled = true;
     submit.textContent = 'Placing order...';
@@ -135,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         token,
         body: {
           items: cart.map((item) => ({ productId: item.productId, quantity: item.quantity, purchaseType: item.purchaseType, rentalDays: item.rentalDays })),
-          deliveryAddress
+          deliveryAddress: orderAddress
         }
       });
       cart = [];
@@ -147,6 +146,4 @@ document.addEventListener('DOMContentLoaded', async () => {
       submit.textContent = 'Place order';
     }
   });
-
-  renderCart();
 });

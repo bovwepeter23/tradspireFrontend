@@ -41,6 +41,10 @@ function hideAlert() {
   alertBox.className = 'alert-box hidden';
 }
 
+const termsDialog = document.getElementById('termsDialog');
+document.querySelector('[data-open-terms]').addEventListener('click', () => termsDialog.showModal());
+document.querySelector('[data-close-terms]').addEventListener('click', () => termsDialog.close());
+
 // 1. LOGIN HANDLER
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();

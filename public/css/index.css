@@ -319,6 +319,33 @@ body {
   color: var(--text-secondary);
 }
 
+.account-form .password-field {
+  position: relative;
+}
+
+.account-form .password-field input {
+  padding-right: 68px;
+}
+
+.account-form .password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  padding: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--gold-accent);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.account-form .password-toggle:focus-visible {
+  outline: 2px solid var(--primary-gold);
+  outline-offset: 2px;
+}
+
 .account-form-grid,
 .checkout-location-grid {
   display: grid;
@@ -1298,7 +1325,11 @@ body {
 }
 
 .order-card-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
   border-top: 1px solid rgba(212, 175, 55, 0.16);
+  background: var(--bg-primary);
 }
 
 .order-delivery-address {
@@ -1379,15 +1410,11 @@ body {
   font: inherit;
 }
 
-.cart-summary {
+.cart-checkout {
   padding: 20px;
   border: 1px solid var(--border-gold);
   border-radius: 6px;
   background: var(--bg-surface);
-}
-
-.cart-summary h2 {
-  font-size: 1.1rem;
 }
 
 .cart-total {
@@ -1413,7 +1440,6 @@ body {
 .checkout-form {
   display: grid;
   gap: 8px;
-  margin-top: 22px;
 }
 
 .checkout-address-heading {

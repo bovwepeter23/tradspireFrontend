@@ -29,7 +29,10 @@
 
       <div class="form-group">
         <label for="loginPassword">Password</label>
-        <input type="password" id="loginPassword" placeholder="••••••••" required />
+        <div class="password-field">
+          <input type="password" id="loginPassword" placeholder="••••••••" required />
+          <button class="password-toggle" type="button" data-password-toggle aria-label="Show password" aria-controls="loginPassword" aria-pressed="false">Show</button>
+        </div>
       </div>
 
       <div class="form-actions">
@@ -52,7 +55,18 @@
 
       <div class="form-group">
         <label for="regPassword">Password</label>
-        <input type="password" id="regPassword" placeholder="••••••••" required />
+        <div class="password-field">
+          <input type="password" id="regPassword" placeholder="••••••••" required />
+          <button class="password-toggle" type="button" data-password-toggle aria-label="Show password" aria-controls="regPassword" aria-pressed="false">Show</button>
+        </div>
+      </div>
+
+      <div class="terms-agreement">
+        <label for="agreeToTerms">
+          <input type="checkbox" id="agreeToTerms" name="agreeToTerms" required />
+          <span>I've agreed to the terms and conditions</span>
+        </label>
+        <button class="terms-read-button" type="button" data-open-terms>Read terms</button>
       </div>
 
       <button type="submit" class="btn-submit">Create Account</button>
@@ -72,9 +86,25 @@
         <a href="#" class="forgot-link" onclick="switchTab('login')">Back to Login</a>
       </div>
     </form>
+
+    <dialog class="terms-dialog" id="termsDialog" aria-labelledby="termsTitle">
+      <div class="terms-dialog-content">
+        <p class="terms-eyebrow">Tradspire account</p>
+        <h2 id="termsTitle">Terms and conditions</h2>
+        <p>By creating an account, you agree to use Tradspire responsibly and provide accurate account information.</p>
+        <h3>Marketplace use</h3>
+        <p>Use the marketplace to make genuine purchases and rentals. Product availability, condition, delivery, and seller-provided details may vary.</p>
+        <h3>Orders and account security</h3>
+        <p>You are responsible for activity on your account and for reviewing your order details before placing an order. Contact support if you notice unauthorized activity.</p>
+        <h3>Respectful participation</h3>
+        <p>Do not misuse the service, interfere with other users, or submit unlawful, misleading, or abusive content.</p>
+        <button class="btn-submit terms-close-button" type="button" data-close-terms>Close</button>
+      </div>
+    </dialog>
   </div>
 
   <script src="../js/api.js"></script>
+  <script src="../js/password-toggle.js"></script>
   <script src="../js/login.js"></script>
 </body>
 </html>

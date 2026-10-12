@@ -123,6 +123,115 @@ body {
   border-color: var(--primary-gold);
 }
 
+.terms-agreement {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.terms-agreement label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.terms-agreement input {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  accent-color: var(--primary-gold);
+}
+
+.terms-read-button {
+  flex: 0 0 auto;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--gold-accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.terms-dialog {
+  width: min(480px, calc(100vw - 32px));
+  max-height: min(80vh, 680px);
+  margin: auto;
+  padding: 24px;
+  border: 1px solid var(--border-gold);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+.terms-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.76);
+}
+
+.terms-dialog-content {
+  display: grid;
+  gap: 12px;
+  max-height: calc(80vh - 48px);
+  overflow-y: auto;
+}
+
+.terms-eyebrow {
+  color: var(--gold-accent);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.terms-dialog h2 {
+  color: var(--primary-gold);
+  font-size: 1.35rem;
+}
+
+.terms-dialog h3 {
+  font-size: 0.95rem;
+}
+
+.terms-dialog p:not(.terms-eyebrow) {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.terms-close-button {
+  margin-top: 8px;
+}
+
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 68px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  padding: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--gold-accent);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.password-toggle:focus-visible {
+  outline: 2px solid var(--primary-gold);
+  outline-offset: 2px;
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;

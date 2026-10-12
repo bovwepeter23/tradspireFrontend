@@ -71,11 +71,20 @@
           <summary>Change password</summary>
           <div class="settings-disclosure-content">
             <label for="currentPassword">Current password</label>
-            <input id="currentPassword" name="currentPassword" type="password" autocomplete="current-password" required>
+            <div class="password-field">
+              <input id="currentPassword" name="currentPassword" type="password" autocomplete="current-password" required>
+              <button class="password-toggle" type="button" data-password-toggle aria-label="Show password" aria-controls="currentPassword" aria-pressed="false">Show</button>
+            </div>
             <label for="newPassword">New password</label>
-            <input id="newPassword" name="newPassword" type="password" autocomplete="new-password" minlength="8" required>
+            <div class="password-field">
+              <input id="newPassword" name="newPassword" type="password" autocomplete="new-password" minlength="8" required>
+              <button class="password-toggle" type="button" data-password-toggle aria-label="Show password" aria-controls="newPassword" aria-pressed="false">Show</button>
+            </div>
             <label for="confirmPassword">Confirm new password</label>
-            <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required>
+            <div class="password-field">
+              <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required>
+              <button class="password-toggle" type="button" data-password-toggle aria-label="Show password" aria-controls="confirmPassword" aria-pressed="false">Show</button>
+            </div>
             <button class="text-button" type="submit">Update password</button>
           </div>
         </details>
@@ -84,6 +93,7 @@
     </main>
   </div>
   <script src="../js/api.js"></script>
+  <script src="../js/password-toggle.js"></script>
   <script src="../js/index.js"></script>
   <script src="../js/settings.js"></script>
 </body>
