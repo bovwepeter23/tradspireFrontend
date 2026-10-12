@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const topbar = document.querySelector("[data-app-topbar]");
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
   const isHtmlPage = window.location.pathname.includes("/html/");
+  const isLoggedIn = Boolean(localStorage.getItem("token"));
   const homePageHref = isHtmlPage ? "../index.html" : "index.html";
   const pageHref = (page) => page === "index.html"
     ? homePageHref
@@ -17,7 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
     { label: "Cart", icon: "shopping-cart", page: "cart.html" },
     { label: "Orders", icon: "shopping-bag", page: "orders.html" },
     { label: "Settings", icon: "settings", page: "settings.html" },
-    { label: "Account", icon: "user-round", page: "profile.html" }
+    { label: "Account", icon: "user-round", page: "profile.html" },
+    { label: "Analytics", icon: "chart-no-axes-combined", page: "analytics.html" }
   ];
 
   navigation.push({ label: "Admin", icon: "shield-check", page: "admin.html" });
@@ -26,7 +28,9 @@ document.addEventListener("DOMContentLoaded", () => {
     sidebar.innerHTML = `<nav class="sidebar-nav" aria-label="Main navigation">${navigation.map((item) => {
       const active = currentPage === item.page || (item.page === "products.html" && currentPage === "product.html");
       return `<a href="${pageHref(item.page)}" class="nav-item${active ? " active" : ""}"${active ? ' aria-current="page"' : ""}><i data-lucide="${item.icon}" aria-hidden="true"></i><span>${item.label}</span></a>`;
-    }).join("")}<button class="nav-item nav-logout-button" type="button" data-logout><i data-lucide="log-out" aria-hidden="true"></i><span>Log out</span></button></nav>`;
+    }).join("")}${isLoggedIn
+      ? '<button class="nav-item nav-logout-button" type="button" data-logout><i data-lucide="log-out" aria-hidden="true"></i><span>Log out</span></button>'
+      : `<a class="nav-item nav-logout-button" href="${pageHref("login.html")}"><i data-lucide="log-in" aria-hidden="true"></i><span>Log in</span></a>`}</nav>`;
   }
 
   if (topbar) {
@@ -94,6 +98,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const logout = () => {
+    if (!isLoggedIn) {
+      window.location.replace(pageHref("login.html"));
+      return;
+    }
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("role");
@@ -101,6 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   document.querySelectorAll("[data-logout], #logoutButton").forEach((button) => {
+    if (button.id === "logoutButton" && !isLoggedIn) button.textContent = "Log in";
     button.addEventListener("click", logout);
   });
 

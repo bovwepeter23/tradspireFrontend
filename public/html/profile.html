@@ -12,29 +12,37 @@
   <header class="topbar" data-app-topbar></header>
   <div class="layout-body">
     <aside class="sidebar" data-app-sidebar></aside>
-    <main class="main-content">
-      <p class="eyebrow">Your account</p>
-      <h1>Account</h1>
-      <p class="page-description">Your account and delivery details.</p>
-      <p class="account-message" data-profile-message role="status" aria-live="polite"></p>
-      <section>
-        <h2>Personal details</h2>
+    <main class="main-content account-page">
+      <div class="account-intro">
+        <p class="eyebrow">Your account</p>
+        <h1>Account</h1>
+        <p class="page-description">Your personal details and delivery information, all in one place.</p>
+        <p class="account-message" data-profile-message role="status" aria-live="polite"></p>
+      </div>
+      <section class="account-section" aria-labelledby="personalDetailsTitle">
+        <div class="account-section-heading">
+          <p class="account-section-index">01 / PROFILE</p>
+          <h2 id="personalDetailsTitle">Personal details</h2>
+        </div>
         <dl class="account-details">
-          <dt>Full name</dt><dd data-account-field="name">Not provided</dd>
-          <dt>Email address</dt><dd data-account-field="email">Not provided</dd>
+          <div><dt>Full name</dt><dd data-account-field="name">Not provided</dd></div>
+          <div><dt>Email address</dt><dd data-account-field="email">Not provided</dd></div>
         </dl>
       </section>
-      <section>
-        <h2>Delivery address</h2>
+      <section class="account-section" aria-labelledby="deliveryAddressTitle">
+        <div class="account-section-heading">
+          <p class="account-section-index">02 / DELIVERY</p>
+          <h2 id="deliveryAddressTitle">Delivery address</h2>
+        </div>
         <dl class="account-details">
-          <dt>Recipient name</dt><dd data-account-field="deliveryAddress.fullName">Not provided</dd>
-          <dt>Phone number</dt><dd data-account-field="deliveryAddress.phone">Not provided</dd>
-          <dt>Street address</dt><dd data-account-field="deliveryAddress.addressLine1">Not provided</dd>
-          <dt>Apartment, suite, etc.</dt><dd data-account-field="deliveryAddress.addressLine2">Not provided</dd>
-          <dt>City</dt><dd data-account-field="deliveryAddress.city">Not provided</dd>
-          <dt>State / region</dt><dd data-account-field="deliveryAddress.region">Not provided</dd>
-          <dt>Postal code</dt><dd data-account-field="deliveryAddress.postalCode">Not provided</dd>
-          <dt>Country</dt><dd data-account-field="deliveryAddress.country">Not provided</dd>
+          <div><dt>Recipient name</dt><dd data-account-field="deliveryAddress.fullName">Not provided</dd></div>
+          <div><dt>Phone number</dt><dd data-account-field="deliveryAddress.phone">Not provided</dd></div>
+          <div><dt>Street address</dt><dd data-account-field="deliveryAddress.addressLine1">Not provided</dd></div>
+          <div><dt>Apartment, suite, etc.</dt><dd data-account-field="deliveryAddress.addressLine2">Not provided</dd></div>
+          <div><dt>City</dt><dd data-account-field="deliveryAddress.city">Not provided</dd></div>
+          <div><dt>State / region</dt><dd data-account-field="deliveryAddress.region">Not provided</dd></div>
+          <div><dt>Postal code</dt><dd data-account-field="deliveryAddress.postalCode">Not provided</dd></div>
+          <div><dt>Country</dt><dd data-account-field="deliveryAddress.country">Not provided</dd></div>
         </dl>
       </section>
     </main>

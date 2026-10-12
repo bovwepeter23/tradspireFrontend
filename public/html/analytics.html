@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics | Tradspire</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="../css/index.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <header class="topbar" data-app-topbar></header>
+  <div class="layout-body">
+    <aside class="sidebar" data-app-sidebar></aside>
+    <main class="main-content analytics-page" data-analytics-page>
+      <header class="analytics-header">
+        <div>
+          <p class="eyebrow">Tradspire / Business intelligence</p>
+          <h1>Store pulse</h1>
+          <p class="page-description">Sales, product demand, and fulfilment in one clear view.</p>
+        </div>
+        <div class="analytics-refresh-group">
+          <button class="analytics-refresh" type="button" data-analytics-refresh>
+            <i data-lucide="refresh-cw" aria-hidden="true"></i>
+            <span>Refresh</span>
+          </button>
+          <span class="analytics-updated" data-analytics-updated>Waiting for data</span>
+        </div>
+      </header>
+
+      <div class="analytics-toolbar">
+        <p data-analytics-period-label>Last 30 days</p>
+        <div class="analytics-range" role="group" aria-label="Analytics date range">
+          <button type="button" data-analytics-range="7d" aria-pressed="false">7 days</button>
+          <button type="button" data-analytics-range="30d" aria-pressed="true">30 days</button>
+          <button type="button" data-analytics-range="90d" aria-pressed="false">90 days</button>
+          <button type="button" data-analytics-range="all" aria-pressed="false">All time</button>
+        </div>
+      </div>
+
+      <p class="analytics-message" data-analytics-message role="status" aria-live="polite">Loading store data...</p>
+      <a class="analytics-login-link" href="login.html" data-analytics-login hidden>Sign in</a>
+
+      <section class="analytics-kpis" aria-label="Key business metrics">
+        <article class="analytics-kpi analytics-kpi-sales">
+          <p>Booked value</p>
+          <strong data-kpi-value>--</strong>
+          <span>Excluding cancelled orders</span>
+        </article>
+        <article class="analytics-kpi analytics-kpi-orders">
+          <p>Orders</p>
+          <strong data-kpi-orders>--</strong>
+          <span data-kpi-orders-note>In selected period</span>
+        </article>
+        <article class="analytics-kpi analytics-kpi-average">
+          <p>Average order value</p>
+          <strong data-kpi-average>--</strong>
+          <span>Non-cancelled orders</span>
+        </article>
+        <article class="analytics-kpi analytics-kpi-rentals">
+          <p>Rental units</p>
+          <strong data-kpi-rentals>--</strong>
+          <span data-kpi-rentals-note>Across all rental orders</span>
+        </article>
+      </section>
+
+      <section class="analytics-primary-grid" aria-label="Sales overview">
+        <article class="analytics-panel analytics-trend-panel">
+          <div class="analytics-panel-heading">
+            <div>
+              <p class="analytics-kicker">Performance</p>
+              <h2>Booked value trend</h2>
+            </div>
+            <strong data-trend-total>--</strong>
+          </div>
+          <p class="analytics-panel-note" data-trend-note>Non-cancelled order value over time</p>
+          <div class="analytics-trend-chart" data-trend-chart role="img" aria-label="Order value trend loading">
+            <div class="analytics-trend-bars" data-trend-bars aria-hidden="true"></div>
+          </div>
+          <div class="analytics-trend-labels" data-trend-labels aria-hidden="true"></div>
+          <p class="analytics-trend-comparison" data-trend-comparison></p>
+        </article>
+
+        <article class="analytics-panel analytics-mix-panel">
+          <div class="analytics-panel-heading">
+            <div>
+              <p class="analytics-kicker">How customers shop</p>
+              <h2>Buy vs rent</h2>
+            </div>
+          </div>
+          <p class="analytics-panel-note">Order item value by purchase type</p>
+          <div class="analytics-mix-list" data-order-mix></div>
+          <div class="analytics-mix-legend">
+            <span><i class="analytics-dot analytics-dot-buy"></i>Buy</span>
+            <span><i class="analytics-dot analytics-dot-rent"></i>Rent</span>
+          </div>
+        </article>
+      </section>
+
+      <section class="analytics-secondary-grid" aria-label="Product and fulfilment analysis">
+        <article class="analytics-panel">
+          <div class="analytics-panel-heading">
+            <div>
+              <p class="analytics-kicker">Fulfilment</p>
+              <h2>Order status</h2>
+            </div>
+          </div>
+          <div class="analytics-status-list" data-status-list></div>
+        </article>
+        <article class="analytics-panel">
+          <div class="analytics-panel-heading">
+            <div>
+              <p class="analytics-kicker">Demand</p>
+              <h2>Top products</h2>
+            </div>
+            <span class="analytics-panel-note">By units ordered</span>
+          </div>
+          <div class="analytics-products-list" data-top-products></div>
+        </article>
+      </section>
+
+      <section class="analytics-insights-panel" aria-labelledby="analyticsInsightsTitle">
+        <div class="analytics-panel-heading">
+          <div>
+            <p class="analytics-kicker">Read between the numbers</p>
+            <h2 id="analyticsInsightsTitle">Signals to watch</h2>
+          </div>
+        </div>
+        <div class="analytics-insights-list" data-analytics-insights></div>
+      </section>
+
+      <section class="analytics-recent-section" aria-labelledby="recentOrdersTitle">
+        <div class="analytics-panel-heading">
+          <div>
+            <p class="analytics-kicker">Latest activity</p>
+            <h2 id="recentOrdersTitle">Recent orders</h2>
+          </div>
+          <a href="orders.html">View customer orders</a>
+        </div>
+        <div class="analytics-recent-list" data-recent-orders></div>
+      </section>
+    </main>
+  </div>
+  <script src="../js/api.js"></script>
+  <script src="../js/index.js"></script>
+  <script src="../js/analytics.js"></script>
+</body>
+</html>
