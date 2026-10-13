@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <button class="customer-policy-close" type="button" data-close-about-dialog aria-label="Close About Tradspire">&times;</button>
         </div>
-        <p>Tradspire is a marketplace celebrating heritage, craftsmanship, and culture. Our mission is to connect people with culturally meaningful products and creations, helping preserve cultural values while supporting the makers and communities behind them.</p>
+        <p>Tradspire is a platform dedicated to preserving and promoting cultural values. We connect people with products, services, and experiences that celebrate our heritage, while embracing innovation and expanding across diverse industries to create a lasting impact.</p>
       </div>
     </dialog>
   `;
