@@ -3,7 +3,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const topbar = document.querySelector("[data-app-topbar]");
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
   const isHtmlPage = window.location.pathname.includes("/html/");
-  const isLoggedIn = Boolean(localStorage.getItem("token"));
+  let isLoggedIn = Boolean(localStorage.getItem("token"));
+  const clearAuth = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("role");
+    isLoggedIn = false;
+  };
+  const tokenIsExpired = (token) => {
+    try {
+      const payload = token.split(".")[1];
+      if (!payload) return false;
+      const normalizedPayload = payload.replace(/-/g, "+").replace(/_/g, "/");
+      const decodedPayload = atob(normalizedPayload.padEnd(Math.ceil(normalizedPayload.length / 4) * 4, "="));
+      const { exp } = JSON.parse(decodedPayload);
+      return Number.isFinite(exp) && exp * 1000 <= Date.now();
+    } catch (error) {
+      return false;
+    }
+  };
+  if (isLoggedIn && tokenIsExpired(localStorage.getItem("token"))) clearAuth();
   const homePageHref = isHtmlPage ? "../index.html" : "index.html";
   const pageHref = (page) => page === "index.html"
     ? homePageHref
@@ -29,8 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const active = currentPage === item.page || (item.page === "products.html" && currentPage === "product.html");
       return `<a href="${pageHref(item.page)}" class="nav-item${active ? " active" : ""}"${active ? ' aria-current="page"' : ""}><i data-lucide="${item.icon}" aria-hidden="true"></i><span>${item.label}</span></a>`;
     }).join("")}${isLoggedIn
-      ? '<button class="nav-item nav-logout-button" type="button" data-logout><i data-lucide="log-out" aria-hidden="true"></i><span>Log out</span></button>'
-      : `<a class="nav-item nav-logout-button" href="${pageHref("login.html")}"><i data-lucide="log-in" aria-hidden="true"></i><span>Log in</span></a>`}</nav>`;
+      ? '<button class="nav-item nav-logout-button" type="button" data-logout data-auth-action><i data-lucide="log-out" aria-hidden="true"></i><span>Log out</span></button>'
+      : `<a class="nav-item nav-logout-button" data-auth-action href="${pageHref("login.html")}"><i data-lucide="log-in" aria-hidden="true"></i><span>Log in</span></a>`}</nav>`;
   }
 
   if (topbar) {
@@ -42,15 +61,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const cartCount = document.querySelector("[data-cart-count]");
-  if (cartCount) {
-    try {
-      const cart = JSON.parse(localStorage.getItem("tradspire-cart") || "[]");
-      const count = cart.reduce((total, item) => total + Number(item.quantity || 0), 0);
+  const token = localStorage.getItem("token");
+  if (cartCount && token) {
+    window.TradspireAPI.request("/api/cart", { token, silent: true })
+      .then((response) => {
+        const items = response.cart?.items || response.items || [];
+        const count = items.reduce((total, item) => total + Number(item.quantity || 0), 0);
       cartCount.textContent = count > 99 ? "99+" : String(count);
       cartCount.hidden = count === 0;
-    } catch (error) {
-      cartCount.hidden = true;
-    }
+      })
+      .catch(() => {
+        cartCount.hidden = true;
+      });
   }
 
   const menuToggle = document.querySelector("[data-menu-toggle]");
@@ -102,11 +124,22 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.replace(pageHref("login.html"));
       return;
     }
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("role");
+    clearAuth();
     window.location.replace(isHtmlPage ? "login.html" : "html/login.html");
   };
+
+  window.addEventListener("tradspire:auth-expired", () => {
+    clearAuth();
+    const authAction = document.querySelector("[data-auth-action]");
+    if (!authAction) return;
+    const loginLink = document.createElement("a");
+    loginLink.className = "nav-item nav-logout-button";
+    loginLink.href = pageHref("login.html");
+    loginLink.dataset.authAction = "";
+    loginLink.innerHTML = '<i data-lucide="log-in" aria-hidden="true"></i><span>Log in</span>';
+    authAction.replaceWith(loginLink);
+    if (window.lucide) window.lucide.createIcons();
+  });
 
   document.querySelectorAll("[data-logout], #logoutButton").forEach((button) => {
     if (button.id === "logoutButton" && !isLoggedIn) button.textContent = "Log in";

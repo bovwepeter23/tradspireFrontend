@@ -6,14 +6,21 @@
   <title>Product | Tradspire</title>
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="stylesheet" href="../css/index.css">
+  <link rel="stylesheet" href="../css/footer.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
   <header class="topbar" data-app-topbar></header>
   <div class="layout-body">
     <aside class="sidebar" data-app-sidebar></aside>
-    <main class="main-content">
-      <a class="back-link" href="products.html"><i data-lucide="arrow-left" aria-hidden="true"></i> Back to products</a>
+    <main class="main-content product-page">
+      <nav class="product-breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Home</a>
+        <span aria-hidden="true">›</span>
+        <a href="products.html">Products</a>
+        <span aria-hidden="true">›</span>
+        <span data-product-breadcrumb>Product details</span>
+      </nav>
       <section class="product-detail" data-product-detail aria-live="polite">
         <p class="empty-state">Loading product...</p>
       </section>
@@ -22,5 +29,6 @@
   <script src="../js/api.js"></script>
   <script src="../js/index.js"></script>
   <script src="../js/product.js"></script>
+  <script src="../js/footer.js"></script>
 </body>
 </html>

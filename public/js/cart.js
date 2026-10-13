@@ -14,18 +14,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     return element;
   };
   const money = (amount) => `₦${Number(amount || 0).toFixed(2)}`;
-  const readCart = () => {
-    try {
-      const cart = JSON.parse(localStorage.getItem('tradspire-cart') || '[]');
-      return Array.isArray(cart) ? cart : [];
-    } catch (error) {
-      return [];
-    }
-  };
-  const writeCart = (cart) => localStorage.setItem('tradspire-cart', JSON.stringify(cart));
-  let cart = readCart();
+  let cart = [];
   let deliveryAddress = null;
 
+  const productIdFor = (item) => String(item.productId?._id || item.productId || '');
   const hasDeliveryAddress = () => requiredAddressFields.every((field) => String(deliveryAddress?.[field] || '').trim());
 
   const updateCartCount = () => {
@@ -58,11 +50,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         quantity.min = '1';
         quantity.max = '99';
         quantity.value = String(item.quantity);
-        quantity.dataset.cartQuantity = item.productId;
+        quantity.dataset.cartQuantity = item._id;
         quantityLabel.append(quantity);
         const remove = makeText('button', 'cart-remove', 'Remove');
         remove.type = 'button';
-        remove.dataset.removeCartItem = item.productId;
+        remove.dataset.removeCartItem = item._id;
         const duration = item.purchaseType === 'rent' ? Number(item.rentalDays || 1) : 1;
         row.append(image, details, quantityLabel, makeText('strong', 'cart-line-total', money(item.price * item.quantity * duration)), remove);
         return row;
@@ -71,50 +63,89 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (totalElement) {
       totalElement.textContent = money(cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity) * (item.purchaseType === 'rent' ? Number(item.rentalDays || 1) : 1), 0));
     }
-    writeCart(cart);
     updateCartCount();
     placeOrderButton.disabled = cart.length === 0 || !token || !hasDeliveryAddress();
   };
 
-  itemsContainer.addEventListener('change', (event) => {
+  const loadCart = async () => {
+    const response = await window.TradspireAPI.request('/api/cart', { token, silent: true });
+    cart = response.cart?.items || response.items || [];
+    renderCart();
+  };
+
+  itemsContainer.addEventListener('change', async (event) => {
     const input = event.target.closest('[data-cart-quantity]');
     if (!input) return;
     const quantity = Number(input.value);
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
-      input.value = String(cart.find((item) => item.productId === input.dataset.cartQuantity)?.quantity || 1);
+      input.value = String(cart.find((item) => item._id === input.dataset.cartQuantity)?.quantity || 1);
       message.textContent = 'Quantity must be between 1 and 99.';
       return;
     }
-    const item = cart.find((entry) => entry.productId === input.dataset.cartQuantity);
-    if (item) item.quantity = quantity;
+    const item = cart.find((entry) => entry._id === input.dataset.cartQuantity);
+    if (!item) {
+      message.textContent = 'This cart item could not be updated. Refresh and try again.';
+      renderCart();
+      return;
+    }
+    input.disabled = true;
     message.textContent = '';
-    renderCart();
+    try {
+      await window.TradspireAPI.request(`/api/cart/items/${encodeURIComponent(item._id)}`, {
+        method: 'PATCH',
+        token,
+        silent: true,
+        body: { quantity }
+      });
+      await loadCart();
+    } catch (error) {
+      message.textContent = error.message || 'The quantity could not be updated.';
+      renderCart();
+    }
   });
 
-  itemsContainer.addEventListener('click', (event) => {
+  itemsContainer.addEventListener('click', async (event) => {
     const button = event.target.closest('[data-remove-cart-item]');
     if (!button) return;
-    cart = cart.filter((item) => item.productId !== button.dataset.removeCartItem);
-    message.textContent = 'Item removed from your cart.';
-    renderCart();
+    const item = cart.find((entry) => entry._id === button.dataset.removeCartItem);
+    if (!item) {
+      message.textContent = 'This cart item could not be removed. Refresh and try again.';
+      return;
+    }
+    button.disabled = true;
+    try {
+      await window.TradspireAPI.request(`/api/cart/items/${encodeURIComponent(item._id)}`, {
+        method: 'DELETE',
+        token,
+        silent: true
+      });
+      message.textContent = 'Item removed from your cart.';
+      await loadCart();
+    } catch (error) {
+      message.textContent = error.message || 'The item could not be removed.';
+      button.disabled = false;
+    }
   });
 
-  renderCart();
-
   if (!token) {
+    renderCart();
     placeOrderButton.hidden = true;
     document.querySelector('[data-cart-login]').hidden = false;
-    message.textContent = 'Sign in to place an order.';
+    message.textContent = 'Sign in to view your account cart and place an order.';
   } else {
     try {
-      const response = await window.TradspireAPI.request('/api/users/profile', { token });
-      deliveryAddress = response.user?.deliveryAddress || null;
+      const [profileResponse] = await Promise.all([
+        window.TradspireAPI.request('/api/users/profile', { token, silent: true }),
+        loadCart()
+      ]);
+      deliveryAddress = profileResponse.user?.deliveryAddress || null;
       if (!hasDeliveryAddress()) {
         message.textContent = 'Add a complete delivery address in Settings before placing an order.';
       }
       renderCart();
     } catch (error) {
-      message.textContent = error.message || 'Your saved delivery address could not be loaded.';
+      itemsContainer.replaceChildren(makeText('p', 'empty-state', 'Your cart could not be loaded.'));
+      message.textContent = error.message || 'Your cart or delivery address could not be loaded.';
     }
   }
 
@@ -132,13 +163,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       await window.TradspireAPI.request('/api/orders', {
         method: 'POST',
         token,
+        silent: true,
         body: {
-          items: cart.map((item) => ({ productId: item.productId, quantity: item.quantity, purchaseType: item.purchaseType, rentalDays: item.rentalDays })),
+          items: cart.map((item) => ({ productId: productIdFor(item), quantity: item.quantity, purchaseType: item.purchaseType, rentalDays: item.rentalDays })),
           deliveryAddress: orderAddress
         }
       });
-      cart = [];
-      writeCart(cart);
       window.location.assign('orders.html?placed=1');
     } catch (error) {
       message.textContent = error.message || 'Your order could not be placed.';

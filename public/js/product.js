@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     element.textContent = text;
     return element;
   };
+  const breadcrumb = document.querySelector('[data-product-breadcrumb]');
   const imageUrlFor = (image) => typeof image === 'string' ? image : image?.url || image?.image;
   const availableFor = (product) => {
     if (Array.isArray(product.availableFor)) return product.availableFor;
@@ -38,21 +39,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (product.listingType) return [product.listingType];
     return product.isRentable ? ['rent'] : ['buy'];
   };
-  const readCart = () => {
-    try {
-      const cart = JSON.parse(localStorage.getItem('tradspire-cart') || '[]');
-      return Array.isArray(cart) ? cart : [];
-    } catch (error) {
-      return [];
-    }
-  };
-  const setCartCount = (cart) => {
+  const setCartCount = (items) => {
     const badge = document.querySelector('[data-cart-count]');
     if (!badge) return;
-    const quantity = cart.reduce((total, item) => total + Number(item.quantity || 0), 0);
+    const quantity = items.reduce((total, item) => total + Number(item.quantity || 0), 0);
     badge.textContent = quantity > 99 ? '99+' : String(quantity);
     badge.hidden = quantity === 0;
   };
+  const cartItemsFrom = (response) => response.cart?.items || response.items || [];
 
   try {
     const response = await window.TradspireAPI.request(`/api/products/${encodeURIComponent(productId)}`);
@@ -61,6 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       showUnavailable('We could not find that item.');
       return;
     }
+    if (breadcrumb) breadcrumb.textContent = product.name;
 
     const imageWrap = document.createElement('div');
     imageWrap.className = 'product-detail-image-wrap';
@@ -92,20 +87,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const copy = document.createElement('div');
     copy.className = 'product-detail-copy';
+    const category = Array.isArray(product.categories)
+      ? product.categories.join(' · ')
+      : product.categories || product.category || '';
+    if (category) copy.append(makeText('p', 'product-category', category));
+    copy.append(makeText('h1', '', product.name));
+    if (product.origin) copy.append(makeText('p', 'product-origin', `Made in ${product.origin}`));
     copy.append(
-      makeText('p', 'product-category', Array.isArray(product.categories) ? product.categories.join(' · ') : product.categories || product.category || ''),
-      makeText('h1', '', product.name),
-      makeText('p', 'product-origin', `Made in ${product.origin}`),
+      makeText('p', 'product-detail-price', ''),
       makeText('p', 'product-detail-description', product.description || '')
     );
+    const displayedPrice = copy.querySelector('.product-detail-price');
 
     const types = availableFor(product);
     const purchasePanel = document.createElement('div');
     purchasePanel.className = 'product-price-panel';
-    const modeLabel = makeText('p', 'product-price-caption', 'Choose how you want this item');
+    const modeLabel = makeText('label', 'product-price-caption', 'Purchase option');
     const mode = document.createElement('select');
     mode.className = 'product-mode';
+    mode.id = 'productPurchaseType';
     mode.setAttribute('aria-label', 'Purchase type');
+    modeLabel.htmlFor = mode.id;
     if (types.includes('buy') && product.price != null) mode.append(new Option(`Buy for ₦${Number(product.price).toFixed(2)}`, 'buy'));
     if (types.includes('rent') && product.rentPricePerDay != null) mode.append(new Option(`Rent for ₦${Number(product.rentPricePerDay).toFixed(2)} per day`, 'rent'));
 
@@ -142,11 +144,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     addButton.textContent = 'Add to cart';
     const message = makeText('p', 'product-cart-message', '');
     const syncMode = () => {
+      const isRental = mode.value === 'rent';
+      const price = isRental ? product.rentPricePerDay : product.price;
+      displayedPrice.textContent = price == null ? '' : `₦${Number(price).toFixed(2)}${isRental ? ' / day' : ''}`;
       daysWrap.hidden = mode.value !== 'rent';
       addButton.disabled = !mode.value;
     };
     mode.addEventListener('change', syncMode);
-    addButton.addEventListener('click', () => {
+    addButton.addEventListener('click', async () => {
       const selectedQuantity = Number(quantity.value);
       const rentalDays = Number(days.value);
       if (!Number.isInteger(selectedQuantity) || selectedQuantity < 1 || selectedQuantity > 99) {
@@ -157,22 +162,51 @@ document.addEventListener('DOMContentLoaded', async () => {
         message.textContent = 'Choose rental days from 1 to 365.';
         return;
       }
-      const cart = readCart();
-      const unitPrice = mode.value === 'rent' ? Number(product.rentPricePerDay) : Number(product.price);
-      const cartKey = `${productId}:${mode.value}:${mode.value === 'rent' ? rentalDays : 0}`;
-      const existing = cart.find((item) => item.cartKey === cartKey);
-      if (existing) existing.quantity = Math.min(99, Number(existing.quantity) + selectedQuantity);
-      else cart.push({ cartKey, productId, name: product.name, image: product.image, price: unitPrice, quantity: selectedQuantity, purchaseType: mode.value, rentalDays: mode.value === 'rent' ? rentalDays : null });
-      localStorage.setItem('tradspire-cart', JSON.stringify(cart));
-      setCartCount(cart);
-      message.textContent = 'Added to cart.';
+      const token = localStorage.getItem('token');
+      if (!token) {
+        message.textContent = 'Sign in to add items to your account cart.';
+        return;
+      }
+
+      addButton.disabled = true;
+      message.textContent = 'Adding to cart...';
+      try {
+        const response = await window.TradspireAPI.request('/api/cart/items', {
+          method: 'POST',
+          token,
+          silent: true,
+          body: {
+            productId,
+            quantity: selectedQuantity,
+            purchaseType: mode.value,
+            rentalDays: mode.value === 'rent' ? rentalDays : null
+          }
+        });
+        setCartCount(cartItemsFrom(response));
+        message.textContent = 'Added to cart.';
+      } catch (error) {
+        message.textContent = error.message || 'The item could not be added to your cart.';
+      } finally {
+        addButton.disabled = !mode.value;
+      }
     });
 
-    purchasePanel.append(modeLabel, mode, controls, addButton, message);
-    copy.append(purchasePanel);
-    container.replaceChildren(imageWrap, copy);
+    purchasePanel.append(
+      modeLabel,
+      mode,
+      controls,
+      makeText('p', 'product-purchase-note', 'Your selected option and quantity will be saved to your account cart.'),
+      addButton,
+      message
+    );
+    container.replaceChildren(imageWrap, copy, purchasePanel);
     syncMode();
-    setCartCount(readCart());
+    const token = localStorage.getItem('token');
+    if (token) {
+      window.TradspireAPI.request('/api/cart', { token, silent: true })
+        .then((cartResponse) => setCartCount(cartItemsFrom(cartResponse)))
+        .catch(() => {});
+    }
   } catch (error) {
     showUnavailable(error.status === 404 ? 'We could not find that item.' : 'Product details could not be loaded.');
   }

@@ -71,6 +71,12 @@
 
     const responseMessage = data && typeof data === 'object' && data.message;
     if (!response.ok) {
+      if (response.status === 401 && options.token) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('role');
+        window.dispatchEvent(new CustomEvent('tradspire:auth-expired'));
+      }
       const message = responseMessage || `Request failed (${response.status})`;
       showToast(message, true);
       const error = new Error(message);
@@ -78,7 +84,7 @@
       throw error;
     }
 
-    showToast(responseMessage || 'Request completed successfully.');
+    if (!options.silent) showToast(responseMessage || 'Request completed successfully.');
     return data;
   };
 

@@ -1,0 +1,246 @@
+.site-footer {
+  margin-top: 56px;
+  padding: 36px clamp(20px, 4vw, 48px) 18px;
+  background: #111;
+  color: #f5f5f5;
+}
+
+.site-footer-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 1fr);
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.site-footer-brand {
+  max-width: 360px;
+}
+
+.site-footer-logo {
+  display: inline-block;
+  color: #d4af37;
+  font-size: 1.4rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+
+.site-footer-brand p {
+  margin-top: 10px;
+  color: #b8b8b8;
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.site-footer-links {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.site-footer-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.site-footer-column h2 {
+  margin-bottom: 3px;
+  color: #d4af37;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.site-footer-column a {
+  color: #d0d0d0;
+  font-size: 0.88rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.site-footer-column > p {
+  color: #d0d0d0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.site-footer-column > p a {
+  color: #e5c65e;
+}
+
+.site-footer-column a:hover,
+.site-footer-column a:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.site-footer-policy-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #d0d0d0;
+  font: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.site-footer-policy-link:hover,
+.site-footer-policy-link:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.customer-policy-dialog {
+  width: min(680px, calc(100vw - 32px));
+  max-height: min(82vh, 720px);
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 8px;
+  background: #171717;
+  color: #f5f5f5;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+}
+
+.customer-policy-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.76);
+}
+
+.customer-policy-content {
+  display: grid;
+  gap: 18px;
+  max-height: min(82vh, 720px);
+  padding: 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.customer-policy-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.24);
+}
+
+.customer-policy-eyebrow {
+  margin-bottom: 6px;
+  color: #c5a059;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.customer-policy-heading h2 {
+  color: #d4af37;
+  font-size: 1.35rem;
+}
+
+.customer-policy-close {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  place-items: center;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 50%;
+  background: transparent;
+  color: #f5f5f5;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.customer-policy-close:hover {
+  background: rgba(212, 175, 55, 0.12);
+}
+
+.customer-policy-content > p,
+.customer-policy-content section p {
+  color: #c5c5c5;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.customer-policy-content section h3 {
+  margin-bottom: 5px;
+  color: #f5f5f5;
+  font-size: 0.92rem;
+}
+
+.customer-policy-content a {
+  color: #e5c65e;
+  text-underline-offset: 3px;
+}
+
+.customer-policy-close:focus-visible,
+.site-footer-policy-link:focus-visible {
+  outline: 2px solid #d4af37;
+  outline-offset: 3px;
+}
+
+.site-footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1200px;
+  margin: 30px auto 0;
+  padding-top: 16px;
+  border-top: 1px solid rgba(212, 175, 55, 0.24);
+  color: #999;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 640px) {
+  .site-footer {
+    margin-top: 36px;
+    padding: 28px 20px 16px;
+  }
+
+  .site-footer-main {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+
+  .site-footer-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .customer-policy-content {
+    gap: 15px;
+    padding: 20px;
+  }
+
+  .site-footer-bottom {
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 24px;
+  }
+}
+
+body:has(> .site-footer) {
+  height: auto;
+  min-height: 100vh;
+  align-items: stretch;
+  justify-content: space-between;
+  padding: 20px 0 0;
+}
+
+body:has(> .site-footer) > .auth-container {
+  margin: auto;
+}
+
+body:has(> .site-footer) > .site-footer {
+  width: 100%;
+  margin-top: 24px;
+}
