@@ -8,8 +8,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   const renderUser = (user) => {
+    const address = user.deliveryAddress || {};
+    const displayUser = {
+      ...user,
+      deliveryAddress: {
+        fullName: address.fullName || address.recipientName || user.name || '',
+        recipientName: address.recipientName || address.fullName || user.name || '',
+        phone: address.phone || '',
+        addressLine1: address.addressLine1 || address.street || '',
+        street: address.street || address.addressLine1 || '',
+        addressLine2: address.addressLine2 || '',
+        city: address.city || '',
+        region: address.region || '',
+        postalCode: address.postalCode || '',
+        country: address.country || 'Nigeria',
+        instructions: address.instructions || ''
+      }
+    };
     document.querySelectorAll('[data-account-field]').forEach((field) => {
-      const value = field.dataset.accountField.split('.').reduce((current, key) => current?.[key], user);
+      const value = field.dataset.accountField.split('.').reduce((current, key) => current?.[key], displayUser);
       field.textContent = value || 'Not provided';
     });
   };
@@ -30,7 +47,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     const response = await window.TradspireAPI.request('/api/users/profile', { token });
-    user = response.user || user;
+    const profileUser = response.data?.user || response.user || {};
+    user = {
+      ...user,
+      ...profileUser,
+      deliveryAddress: {
+        ...(user.deliveryAddress || {}),
+        ...(profileUser.deliveryAddress || {})
+      }
+    };
     localStorage.setItem('user', JSON.stringify({ ...user }));
     renderUser(user);
     setMessage('Account details are up to date.');

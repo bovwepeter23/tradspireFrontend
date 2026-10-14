@@ -45,6 +45,8 @@
             <input id="addressLine1" name="addressLine1" type="text" autocomplete="shipping address-line1" maxlength="160" required>
             <label for="addressLine2">Apartment, suite, etc. (optional)</label>
             <input id="addressLine2" name="addressLine2" type="text" autocomplete="shipping address-line2" maxlength="160">
+            <label for="addressInstructions">Delivery instructions (optional)</label>
+            <textarea id="addressInstructions" name="instructions" maxlength="500" rows="3"></textarea>
             <div class="account-form-grid account-form-grid-four">
               <div>
                 <label for="addressCity">City</label>
@@ -52,11 +54,11 @@
               </div>
               <div>
                 <label for="addressRegion">State / region</label>
-                <input id="addressRegion" name="region" type="text" autocomplete="shipping address-level1" maxlength="100" required>
+                <input id="addressRegion" name="region" type="text" autocomplete="shipping address-level1" maxlength="100">
               </div>
               <div>
                 <label for="addressPostalCode">Postal code</label>
-                <input id="addressPostalCode" name="postalCode" type="text" autocomplete="shipping postal-code" maxlength="24" required>
+                <input id="addressPostalCode" name="postalCode" type="text" autocomplete="shipping postal-code" maxlength="24">
               </div>
               <div>
                 <label for="addressCountry">Country</label>

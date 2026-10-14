@@ -87,17 +87,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const copy = document.createElement('div');
     copy.className = 'product-detail-copy';
-    const category = Array.isArray(product.categories)
-      ? product.categories.join(' · ')
-      : product.categories || product.category || '';
+    const mainCategory = product.mainCategory?.name
+      || (typeof product.mainCategoryId === 'object' ? product.mainCategoryId?.name : '');
+    const subCategory = product.subCategory?.name
+      || (typeof product.subCategoryId === 'object' ? product.subCategoryId?.name : '');
+    const category = [mainCategory, subCategory].filter(Boolean).join(' · ')
+      || (Array.isArray(product.categories)
+        ? product.categories.join(' · ')
+        : product.categories || product.category || '');
     if (category) copy.append(makeText('p', 'product-category', category));
     copy.append(makeText('h1', '', product.name));
     if (product.origin) copy.append(makeText('p', 'product-origin', `Made in ${product.origin}`));
-    copy.append(
-      makeText('p', 'product-detail-price', ''),
-      makeText('p', 'product-detail-description', product.description || '')
-    );
+    copy.append(makeText('p', 'product-detail-price', ''));
     const displayedPrice = copy.querySelector('.product-detail-price');
+
+    const descriptionWrap = document.createElement('div');
+    descriptionWrap.className = 'product-detail-description-wrap';
+    descriptionWrap.append(makeText('p', 'product-detail-description', product.description || ''));
 
     const types = availableFor(product);
     const purchasePanel = document.createElement('div');
@@ -199,7 +205,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       addButton,
       message
     );
-    container.replaceChildren(imageWrap, copy, purchasePanel);
+    container.replaceChildren(imageWrap, copy, purchasePanel, descriptionWrap);
     syncMode();
     const token = localStorage.getItem('token');
     if (token) {

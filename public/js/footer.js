@@ -9,10 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
   footer.dataset.siteFooter = '';
   footer.innerHTML = `
     <div class="site-footer-main">
-      <div class="site-footer-brand">
-        <a class="site-footer-logo" href="${homeHref}">Tradspire</a>
-        <p>A marketplace celebrating heritage, craftsmanship, and culture.</p>
-      </div>
       <nav class="site-footer-links" aria-label="Footer navigation">
         <div class="site-footer-column">
           <h2>Explore</h2>
@@ -24,6 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <h2>Your account</h2>
           <a href="${pageHref('orders.html')}">Orders</a>
           <a href="${pageHref('profile.html')}">Account details</a>
+        </div>
+        <div class="site-footer-column">
+          <h2>Help &amp; Policies</h2>
           <button class="site-footer-policy-link" type="button" data-open-customer-policy>Customer Support Policy</button>
           <button class="site-footer-policy-link" type="button" data-open-delivery-policy>Delivery Policy</button>
           <button class="site-footer-policy-link" type="button" data-open-report-policy>Report a Product or Make a Complaint</button>
@@ -35,8 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
       </nav>
     </div>
     <div class="site-footer-bottom">
-      <span>&copy; ${new Date().getFullYear()} Tradspire</span>
-      <span>Preserving cultural values</span>
+      <span>&copy; ${new Date().getFullYear()} TRADSPIRE</span>
+      <span>Preserving cultural value</span>
     </div>
     <dialog class="customer-policy-dialog" data-customer-policy-dialog aria-labelledby="customerPolicyTitle">
       <div class="customer-policy-content">

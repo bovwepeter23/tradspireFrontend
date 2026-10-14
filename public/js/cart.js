@@ -3,10 +3,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const totalElement = document.querySelector('[data-cart-total]');
   const message = document.querySelector('[data-cart-message]');
   const placeOrderButton = document.getElementById('placeOrderButton');
-  if (!itemsContainer || !message || !placeOrderButton) return;
+  const orderDialog = document.querySelector('[data-order-dialog]');
+  const orderEstimate = document.querySelector('[data-order-estimate]');
+  const orderDialogMessage = document.querySelector('[data-order-dialog-message]');
+  const confirmOrderButton = document.querySelector('[data-confirm-order]');
+  if (!itemsContainer || !message || !placeOrderButton || !orderDialog || !orderEstimate || !confirmOrderButton) return;
 
   const token = localStorage.getItem('token');
-  const requiredAddressFields = ['fullName', 'phone', 'addressLine1', 'city', 'region', 'postalCode', 'country'];
+  const requiredAddressFields = ['phone', 'addressLine1', 'city'];
+  const orderAddressFields = ['fullName', 'phone', 'addressLine1', 'addressLine2', 'city', 'region', 'postalCode', 'country', 'instructions'];
   const makeText = (tagName, className, text) => {
     const element = document.createElement(tagName);
     element.className = className;
@@ -17,7 +22,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   let cart = [];
   let deliveryAddress = null;
 
+  const cartTotal = () => cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity) * (item.purchaseType === 'rent' ? Number(item.rentalDays || 1) : 1), 0);
   const productIdFor = (item) => String(item.productId?._id || item.productId || '');
+  const normalizeAddress = (address = {}, fallbackName = '') => {
+    const fullName = address.fullName || address.recipientName || fallbackName || '';
+    const addressLine1 = address.addressLine1 || address.street || '';
+    return {
+      fullName,
+      phone: address.phone || '',
+      addressLine1,
+      addressLine2: address.addressLine2 || '',
+      city: address.city || '',
+      region: address.region || '',
+      postalCode: address.postalCode || '',
+      country: address.country || 'Nigeria',
+      instructions: address.instructions || ''
+    };
+  };
   const hasDeliveryAddress = () => requiredAddressFields.every((field) => String(deliveryAddress?.[field] || '').trim());
 
   const updateCartCount = () => {
@@ -61,10 +82,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       }));
     }
     if (totalElement) {
-      totalElement.textContent = money(cart.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity) * (item.purchaseType === 'rent' ? Number(item.rentalDays || 1) : 1), 0));
+      totalElement.textContent = money(cartTotal());
     }
     updateCartCount();
-    placeOrderButton.disabled = cart.length === 0 || !token || !hasDeliveryAddress();
+    placeOrderButton.disabled = cart.length === 0 || !token;
   };
 
   const loadCart = async () => {
@@ -138,9 +159,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.TradspireAPI.request('/api/users/profile', { token, silent: true }),
         loadCart()
       ]);
-      deliveryAddress = profileResponse.user?.deliveryAddress || null;
+      const profileUser = profileResponse.data?.user || profileResponse.user || {};
+      const address = profileUser.deliveryAddress || null;
+      deliveryAddress = address && normalizeAddress(address, profileUser.name);
       if (!hasDeliveryAddress()) {
-        message.textContent = 'Add a complete delivery address in Settings before placing an order.';
+        message.textContent = 'No delivery address is saved yet. You can still place your order and add the address later in Settings.';
       }
       renderCart();
     } catch (error) {
@@ -149,31 +172,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  placeOrderButton.addEventListener('click', async () => {
-    if (!cart.length || !token || !hasDeliveryAddress()) return;
+  placeOrderButton.addEventListener('click', () => {
+    if (!cart.length || !token) return;
+    orderEstimate.textContent = money(cartTotal());
+    orderDialogMessage.textContent = '';
+    orderDialog.showModal();
+  });
+
+  document.querySelectorAll('[data-close-order-dialog]').forEach((button) => {
+    button.addEventListener('click', () => orderDialog.close());
+  });
+  orderDialog.addEventListener('click', (event) => {
+    if (event.target === orderDialog) orderDialog.close();
+  });
+
+  confirmOrderButton.addEventListener('click', async () => {
+    if (!cart.length || !token) return;
     const submit = placeOrderButton;
     const orderAddress = Object.fromEntries(
-      [...requiredAddressFields, 'addressLine2']
-        .map((field) => [field, String(deliveryAddress[field] || '').trim()])
+      orderAddressFields.map((field) => [field, String(deliveryAddress?.[field] || '').trim()])
     );
+    const normalizedOrderAddress = {
+      ...orderAddress,
+      recipientName: orderAddress.fullName || '',
+      street: orderAddress.addressLine1 || ''
+    };
+    const hasRentalItems = cart.some((item) => item.purchaseType === 'rent');
+    const orderEndpoint = hasRentalItems ? '/api/orders/rent' : '/api/orders';
+    if (!hasDeliveryAddress()) {
+      orderDialogMessage.textContent = 'No delivery address is saved yet, but your order can still be placed. You can add the address later in Settings.';
+    }
     submit.disabled = true;
-    submit.textContent = 'Placing order...';
-    message.textContent = '';
+    confirmOrderButton.disabled = true;
+    confirmOrderButton.textContent = 'Placing order...';
+    orderDialogMessage.textContent = '';
     try {
-      await window.TradspireAPI.request('/api/orders', {
+      await window.TradspireAPI.request(orderEndpoint, {
         method: 'POST',
         token,
         silent: true,
         body: {
           items: cart.map((item) => ({ productId: productIdFor(item), quantity: item.quantity, purchaseType: item.purchaseType, rentalDays: item.rentalDays })),
-          deliveryAddress: orderAddress
+          deliveryAddress: normalizedOrderAddress
         }
       });
       window.location.assign('orders.html?placed=1');
     } catch (error) {
-      message.textContent = error.message || 'Your order could not be placed.';
-      submit.disabled = false;
-      submit.textContent = 'Place order';
+      orderDialogMessage.textContent = error.message || 'Your order could not be placed.';
+      renderCart();
+      confirmOrderButton.disabled = false;
+      confirmOrderButton.textContent = 'Confirm order';
     }
   });
 });

@@ -16,11 +16,12 @@
     <main class="main-content admin-content" data-admin-content hidden>
       <p class="eyebrow">Marketplace</p>
       <h1>Storefront management</h1>
-      <p class="page-description">Manage products and homepage carousel images.</p>
+      <p class="page-description">Manage products, categories, and homepage carousel images.</p>
       <p class="admin-message" data-admin-message role="status"></p>
       <div class="admin-tabs" role="tablist" aria-label="Admin sections">
         <button class="admin-tab is-active" id="newProductTab" type="button" role="tab" aria-selected="true" aria-controls="productForm" tabindex="0">New Product</button>
         <button class="admin-tab" id="inventoryTab" type="button" role="tab" aria-selected="false" aria-controls="inventoryPanel" tabindex="-1">Inventory</button>
+        <button class="admin-tab" id="categoriesTab" type="button" role="tab" aria-selected="false" aria-controls="categoriesPanel" tabindex="-1">Categories</button>
         <button class="admin-tab" id="carouselTab" type="button" role="tab" aria-selected="false" aria-controls="carouselPanel" tabindex="-1">Carousel</button>
         <button class="admin-tab" id="ordersTab" type="button" role="tab" aria-selected="false" aria-controls="ordersPanel" tabindex="-1">Orders</button>
       </div>
@@ -28,9 +29,14 @@
           <h2 data-product-form-heading>Add product</h2>
           <label for="productName">Product name</label>
           <input id="productName" name="name" type="text" maxlength="120" required>
-          <label for="productCategories">Categories</label>
-          <input id="productCategories" name="categories" type="text" maxlength="240" placeholder="Jewelry, Handmade, Gifts" required>
-          <p class="admin-form-hint">Separate multiple categories with commas.</p>
+          <label for="productMainCategory">Main category</label>
+          <select id="productMainCategory" name="mainCategoryId" required>
+            <option value="">Loading categories...</option>
+          </select>
+          <label for="productSubCategory">Subcategory</label>
+          <select id="productSubCategory" name="subCategoryId" disabled>
+            <option value="">No subcategory</option>
+          </select>
           <fieldset class="admin-choice-group">
             <legend>Listing options</legend>
             <label><input type="checkbox" name="listingType" value="buy" checked> Buy</label>
@@ -72,6 +78,32 @@
         </div>
         <div class="admin-product-list" data-admin-product-list>
           <p class="empty-state">Loading inventory...</p>
+        </div>
+      </section>
+      <section class="admin-categories admin-panel" id="categoriesPanel" role="tabpanel" aria-labelledby="categoriesTab" hidden>
+        <div class="admin-inventory-heading">
+          <div>
+            <p class="eyebrow">Store taxonomy</p>
+            <h2>Manage categories</h2>
+          </div>
+          <span class="inventory-count" data-category-count>0</span>
+        </div>
+        <form class="admin-form admin-category-form" data-category-form>
+          <h3 data-category-form-heading>Add category</h3>
+          <label for="categoryName">Category name</label>
+          <input id="categoryName" name="name" type="text" maxlength="100" required>
+          <label for="categoryParent">Parent main category</label>
+          <select id="categoryParent" name="parentId">
+            <option value="">Main category (no parent)</option>
+          </select>
+          <p class="admin-form-hint">Leave the parent blank to add a main category. Choose a parent to add a subcategory.</p>
+          <div class="admin-form-actions">
+            <button class="text-button admin-submit" type="submit" data-category-submit>Add category</button>
+            <button class="admin-cancel" data-category-cancel type="button" hidden>Cancel edit</button>
+          </div>
+        </form>
+        <div class="admin-category-list" data-category-list>
+          <p class="empty-state">Loading categories...</p>
         </div>
       </section>
       <section class="admin-carousel admin-panel" id="carouselPanel" role="tabpanel" aria-labelledby="carouselTab" hidden>

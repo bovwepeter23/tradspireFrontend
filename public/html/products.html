@@ -17,6 +17,28 @@
       <p class="eyebrow">Marketplace</p>
       <h1>Products</h1>
       <p class="page-description">Browse goods and creations from our community.</p>
+      <form class="catalog-filters" data-catalog-form role="search">
+        <label class="catalog-search-label" for="catalogSearch">Search by product name</label>
+        <div class="catalog-search-row">
+          <input id="catalogSearch" name="search" type="search" maxlength="120" placeholder="Search products">
+          <button class="text-button" type="submit">Search</button>
+        </div>
+        <div class="catalog-category-filters">
+          <div>
+            <label for="catalogMainCategory">Main category</label>
+            <select id="catalogMainCategory" name="categoryId">
+              <option value="">All main categories</option>
+            </select>
+          </div>
+          <div>
+            <label for="catalogSubCategory">Subcategory</label>
+            <select id="catalogSubCategory" name="subCategoryId" disabled>
+              <option value="">All subcategories</option>
+            </select>
+          </div>
+        </div>
+      </form>
+      <p class="catalog-result-count" data-catalog-result-count role="status"></p>
       <div class="product-grid" data-product-grid aria-live="polite">
         <p class="empty-state">Loading products...</p>
       </div>

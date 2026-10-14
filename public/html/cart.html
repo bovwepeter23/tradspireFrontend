@@ -27,6 +27,40 @@
           <a class="checkout-login" data-cart-login href="login.html" hidden>Sign in to place an order</a>
         </aside>
       </div>
+      <dialog class="order-confirm-dialog" data-order-dialog aria-labelledby="orderDialogTitle" aria-describedby="orderDialogDescription">
+        <div class="order-confirm-content">
+          <div class="order-confirm-heading">
+            <div>
+              <p class="eyebrow">Order summary</p>
+              <h2 id="orderDialogTitle">Confirm your order</h2>
+            </div>
+            <button class="order-confirm-close" type="button" data-close-order-dialog aria-label="Close order confirmation">
+              <i data-lucide="x" aria-hidden="true"></i>
+            </button>
+          </div>
+          <p id="orderDialogDescription" class="order-confirm-description">Review your estimated total and payment method before placing your order.</p>
+          <div class="order-estimate-row">
+            <span>Estimated total</span>
+            <strong data-order-estimate>₦0.00</strong>
+          </div>
+          <fieldset class="order-payment-methods">
+            <legend>Payment method</legend>
+            <label class="order-payment-option">
+              <input type="radio" name="paymentMethod" value="pay-on-delivery" checked>
+              <span><strong>Pay on Delivery</strong><small>Pay when your order arrives</small></span>
+            </label>
+            <label class="order-payment-option is-unavailable" aria-disabled="true">
+              <input type="radio" name="paymentMethod" value="pay-online" disabled>
+              <span><strong>Pay Online</strong><small>Unavailable</small></span>
+            </label>
+          </fieldset>
+          <p class="order-dialog-message" data-order-dialog-message role="status" aria-live="polite"></p>
+          <div class="order-confirm-actions">
+            <button class="order-back-button" type="button" data-close-order-dialog>Back to cart</button>
+            <button class="checkout-submit" type="button" data-confirm-order>Confirm order</button>
+          </div>
+        </div>
+      </dialog>
     </main>
   </div>
   <script src="../js/api.js"></script>

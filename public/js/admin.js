@@ -15,6 +15,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const priceInput = form.elements.namedItem('price');
   const rentPriceInput = form.elements.namedItem('rentPricePerDay');
   const subImagesInput = form.elements.namedItem('subImages');
+  const productMainCategory = form.elements.namedItem('mainCategoryId');
+  const productSubCategory = form.elements.namedItem('subCategoryId');
+  const categoryForm = document.querySelector('[data-category-form]');
+  const categoryList = document.querySelector('[data-category-list]');
+  const categoryCount = document.querySelector('[data-category-count]');
+  const categoryParent = categoryForm?.elements.namedItem('parentId');
+  const categoryName = categoryForm?.elements.namedItem('name');
+  const categoryHeading = document.querySelector('[data-category-form-heading]');
+  const categorySubmit = document.querySelector('[data-category-submit]');
+  const categoryCancel = document.querySelector('[data-category-cancel]');
   const carouselForm = document.getElementById('carouselForm');
   const carouselList = document.querySelector('[data-carousel-list]');
   const carouselCount = document.querySelector('[data-carousel-count]');
@@ -33,6 +43,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   let carouselItems = [];
   let editingCarouselId = null;
   let carouselPreviewUrl = null;
+  let categories = [];
+  let editingCategoryId = null;
 
   const setMessage = (text, isError = false) => {
     message.textContent = text;
@@ -74,6 +86,113 @@ document.addEventListener('DOMContentLoaded', async () => {
     return element;
   };
 
+  const parentIdOf = (category) => {
+    const parent = category.parentId;
+    return typeof parent === 'object' && parent ? parent._id : parent || '';
+  };
+
+  const mainCategories = () => categories.filter((category) => !parentIdOf(category));
+  const subCategoriesFor = (mainId) => mainId
+    ? categories.filter((category) => parentIdOf(category) === mainId)
+    : [];
+  const categoryNameFor = (id) => categories.find((category) => category._id === id)?.name || '';
+
+  const syncProductCategoryOptions = (mainId = productMainCategory.value, subId = '') => {
+    const mains = mainCategories();
+    productMainCategory.replaceChildren(new Option('Choose a main category', ''));
+    mains.forEach((category) => productMainCategory.add(new Option(category.name, category._id)));
+    productMainCategory.value = mains.some((category) => category._id === mainId) ? mainId : '';
+
+    const subs = subCategoriesFor(productMainCategory.value);
+    productSubCategory.replaceChildren(new Option('No subcategory', ''));
+    subs.forEach((category) => productSubCategory.add(new Option(category.name, category._id)));
+    productSubCategory.disabled = !subs.length;
+    productSubCategory.value = subs.some((category) => category._id === subId) ? subId : '';
+  };
+
+  const syncCategoryParentOptions = (selectedParent = categoryParent.value) => {
+    const mains = mainCategories().filter((category) => category._id !== editingCategoryId);
+    categoryParent.replaceChildren(new Option('Main category (no parent)', ''));
+    mains.forEach((category) => categoryParent.add(new Option(category.name, category._id)));
+    categoryParent.value = mains.some((category) => category._id === selectedParent) ? selectedParent : '';
+  };
+
+  const categoryLabelFor = (product) => {
+    const mainId = typeof product.mainCategoryId === 'object'
+      ? product.mainCategoryId?._id
+      : product.mainCategoryId || product.categoryId;
+    const subId = typeof product.subCategoryId === 'object'
+      ? product.subCategoryId?._id
+      : product.subCategoryId;
+    const names = [
+      product.mainCategory?.name || categoryNameFor(mainId),
+      product.subCategory?.name || categoryNameFor(subId)
+    ].filter(Boolean);
+    return names.join(' · ') || (Array.isArray(product.categories)
+      ? product.categories.join(', ')
+      : product.categories || product.category || 'Uncategorized');
+  };
+
+  const resetCategoryForm = () => {
+    categoryForm.reset();
+    editingCategoryId = null;
+    categoryHeading.textContent = 'Add category';
+    categorySubmit.textContent = 'Add category';
+    categoryCancel.hidden = true;
+    syncCategoryParentOptions('');
+  };
+
+  const renderCategories = () => {
+    categoryCount.textContent = String(categories.length);
+    syncProductCategoryOptions();
+    syncCategoryParentOptions();
+    if (!categories.length) {
+      categoryList.replaceChildren(makeText('p', 'empty-state', 'No categories yet. Add a main category to get started.'));
+      return;
+    }
+
+    const rows = categories.map((category) => {
+      const row = document.createElement('article');
+      row.className = `admin-category-row${parentIdOf(category) ? ' is-subcategory' : ''}`;
+      const details = document.createElement('div');
+      details.className = 'admin-category-info';
+      details.append(
+        makeText('h3', '', category.name),
+        makeText('p', 'admin-product-meta', parentIdOf(category)
+          ? `Subcategory · ${categoryNameFor(parentIdOf(category)) || 'Main category'}`
+          : 'Main category · shown on the homepage')
+      );
+      const actions = document.createElement('div');
+      actions.className = 'admin-product-actions';
+      const edit = makeText('button', 'admin-action', 'Edit');
+      edit.type = 'button';
+      edit.dataset.editCategory = category._id;
+      const remove = makeText('button', 'admin-action admin-delete', 'Delete');
+      remove.type = 'button';
+      remove.dataset.deleteCategory = category._id;
+      actions.append(edit, remove);
+      row.append(details, actions);
+      return row;
+    });
+    categoryList.replaceChildren(...rows);
+  };
+
+  const loadCategories = async () => {
+    categoryList.setAttribute('aria-busy', 'true');
+    try {
+      const response = await window.TradspireAPI.request('/api/categories', { silent: true });
+      categories = response.categories || [];
+      renderCategories();
+    } catch (error) {
+      categoryList.replaceChildren(makeText('p', 'empty-state', `Categories could not be loaded. ${error.message}`));
+      productMainCategory.replaceChildren(new Option('Categories could not be loaded', ''));
+      productSubCategory.replaceChildren(new Option('No subcategory', ''));
+      setMessage(`Categories could not be loaded. ${error.message}`, true);
+    } finally {
+      categoryList.removeAttribute('aria-busy');
+    }
+  };
+
   const selectedListingTypes = () => listingTypeInputs.filter((input) => input.checked).map((input) => input.value);
 
   const syncListingPrices = () => {
@@ -84,9 +203,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     rentPriceInput.disabled = !types.includes('rent');
   };
 
-  const categoriesFor = (product) => Array.isArray(product.categories)
-    ? product.categories.join(', ')
-    : product.categories || product.category || '';
+  const categoriesFor = categoryLabelFor;
 
   const listingTypesFor = (product) => {
     if (Array.isArray(product.listingType)) return product.listingType;
@@ -276,6 +393,72 @@ document.addEventListener('DOMContentLoaded', async () => {
     carouselPreviewUrl = null;
   };
 
+  productMainCategory.addEventListener('change', () => syncProductCategoryOptions(productMainCategory.value));
+  categoryParent.addEventListener('change', () => {
+    if (editingCategoryId && categoryParent.value === editingCategoryId) categoryParent.value = '';
+  });
+  categoryCancel.addEventListener('click', () => {
+    resetCategoryForm();
+    setMessage('Category edit cancelled.');
+  });
+
+  categoryForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const parentId = categoryParent.value || null;
+    const body = { name: categoryName.value.trim(), parentId };
+    if (!body.name) return;
+    categorySubmit.disabled = true;
+    setMessage(editingCategoryId ? 'Saving category...' : 'Adding category...');
+    try {
+      await window.TradspireAPI.request(
+        editingCategoryId ? `/api/categories/${encodeURIComponent(editingCategoryId)}` : '/api/categories',
+        { method: editingCategoryId ? 'PUT' : 'POST', token, body }
+      );
+      resetCategoryForm();
+      await loadCategories();
+      setMessage('Category saved.');
+    } catch (error) {
+      setMessage(error.message, true);
+    } finally {
+      categorySubmit.disabled = false;
+    }
+  });
+
+  categoryList.addEventListener('click', async (event) => {
+    const editButton = event.target.closest('[data-edit-category]');
+    if (editButton) {
+      const category = categories.find((item) => item._id === editButton.dataset.editCategory);
+      if (!category) return;
+      editingCategoryId = category._id;
+      categoryName.value = category.name;
+      syncCategoryParentOptions(parentIdOf(category));
+      categoryHeading.textContent = `Edit ${parentIdOf(category) ? 'subcategory' : 'main category'}`;
+      categorySubmit.textContent = 'Save category';
+      categoryCancel.hidden = false;
+      categoryForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      categoryName.focus();
+      return;
+    }
+
+    const deleteButton = event.target.closest('[data-delete-category]');
+    if (!deleteButton) return;
+    const category = categories.find((item) => item._id === deleteButton.dataset.deleteCategory);
+    if (!category || !window.confirm(`Delete ${category.name}? Products or subcategories may need to be reassigned first.`)) return;
+    deleteButton.disabled = true;
+    try {
+      await window.TradspireAPI.request(`/api/categories/${encodeURIComponent(category._id)}`, {
+        method: 'DELETE',
+        token
+      });
+      if (editingCategoryId === category._id) resetCategoryForm();
+      await loadCategories();
+      setMessage(`${category.name} deleted.`);
+    } catch (error) {
+      setMessage(error.message, true);
+      deleteButton.disabled = false;
+    }
+  });
+
   listingTypeInputs.forEach((input) => input.addEventListener('change', () => {
     if (!selectedListingTypes().length) input.checked = true;
     syncListingPrices();
@@ -305,12 +488,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const body = new FormData(form);
-    const categories = form.elements.namedItem('categories').value
-      .split(',')
-      .map((category) => category.trim())
-      .filter(Boolean);
-    body.delete('categories');
-    categories.forEach((category) => body.append('categories', category));
     if (!imageInput.files.length) body.delete('image');
     if (!subImagesInput.files.length) body.delete('subImages');
     submitButton.disabled = true;
@@ -338,7 +515,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!product) return;
       editingId = product._id;
       form.elements.namedItem('name').value = product.name;
-      form.elements.namedItem('categories').value = categoriesFor(product);
+      const mainCategoryId = typeof product.mainCategoryId === 'object'
+        ? product.mainCategoryId?._id
+        : product.mainCategoryId || product.categoryId || '';
+      const subCategoryId = typeof product.subCategoryId === 'object'
+        ? product.subCategoryId?._id
+        : product.subCategoryId || '';
+      syncProductCategoryOptions(mainCategoryId, subCategoryId);
       listingTypeInputs.forEach((input) => { input.checked = listingTypesFor(product).includes(input.value); });
       form.elements.namedItem('price').value = product.price ?? '';
       form.elements.namedItem('rentPricePerDay').value = product.rentPricePerDay ?? '';
@@ -370,6 +553,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         token
       });
       setMessage('Product deleted from the storefront.');
+      await loadCategories();
       await loadProducts();
     } catch (error) {
       setMessage(error.message, true);
@@ -453,7 +637,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     select.disabled = true;
     try {
       await window.TradspireAPI.request(`/api/orders/${encodeURIComponent(select.dataset.orderStatus)}/status`, {
-        method: 'PUT',
+        method: 'PATCH',
         token,
         body: { status: select.value }
       });

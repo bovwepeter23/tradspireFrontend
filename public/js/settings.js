@@ -11,6 +11,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     message.classList.toggle('is-error', isError);
   };
 
+  const normalizeDeliveryAddress = (address = {}, fallbackName = '') => {
+    const fullName = address.fullName || address.recipientName || fallbackName || '';
+    const addressLine1 = address.addressLine1 || address.street || '';
+    return {
+      fullName,
+      recipientName: fullName,
+      phone: address.phone || '',
+      addressLine1,
+      street: addressLine1,
+      addressLine2: address.addressLine2 || '',
+      city: address.city || '',
+      region: address.region || '',
+      postalCode: address.postalCode || '',
+      country: address.country || 'Nigeria',
+      instructions: address.instructions || ''
+    };
+  };
+
   [profileForm, passwordForm].forEach((form) => {
     form.addEventListener('invalid', (event) => {
       event.target.closest('.settings-disclosure')?.setAttribute('open', '');
@@ -26,6 +44,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     localStorage.setItem('user', JSON.stringify({ ...previous, ...user }));
   };
+  const userFromResponse = (response) => response?.data?.user || response?.user || {};
+  const addressFieldsForForm = (address = {}, accountName = '') => normalizeDeliveryAddress(address, accountName);
 
   if (!token) {
     setMessage('Sign in to manage your settings.', true);
@@ -36,10 +56,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     const response = await window.TradspireAPI.request('/api/users/profile', { token });
-    const user = response.user || {};
+    const user = userFromResponse(response);
     profileForm.elements.namedItem('name').value = user.name || '';
     profileForm.elements.namedItem('email').value = user.email || '';
-    Object.entries(user.deliveryAddress || {}).forEach(([field, value]) => {
+    Object.entries(addressFieldsForForm(user.deliveryAddress, user.name)).forEach(([field, value]) => {
       const input = profileForm.elements.namedItem(field);
       if (input) input.value = value || '';
     });
@@ -52,19 +72,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     event.preventDefault();
     const button = profileForm.querySelector('[type="submit"]');
     const data = new FormData(profileForm);
-    const deliveryAddress = Object.fromEntries(
-      ['fullName', 'phone', 'addressLine1', 'addressLine2', 'city', 'region', 'postalCode', 'country']
-        .map((field) => [field, data.get(field).trim()])
-    );
+    const name = data.get('name').trim();
+    const recipientName = data.get('fullName').trim() || name;
+    const street = data.get('addressLine1').trim();
+    const phone = data.get('phone').trim();
+    const city = data.get('city').trim();
+    const country = data.get('country').trim() || 'Nigeria';
+    const deliveryAddress = normalizeDeliveryAddress({
+      fullName: recipientName,
+      recipientName,
+      phone,
+      addressLine1: street,
+      street,
+      city,
+      country,
+      region: data.get('region').trim(),
+      postalCode: data.get('postalCode').trim(),
+      addressLine2: data.get('addressLine2').trim(),
+      instructions: data.get('instructions').trim()
+    }, name);
     button.disabled = true;
     setMessage('Saving settings...');
     try {
       const response = await window.TradspireAPI.request('/api/users/profile', {
         method: 'PUT',
         token,
-        body: { name: data.get('name').trim(), deliveryAddress }
+        body: { name, deliveryAddress }
       });
-      storeUser(response.user || {});
+      const user = userFromResponse(response);
+      storeUser({
+        ...user,
+        name: user.name || name,
+        deliveryAddress: normalizeDeliveryAddress(user.deliveryAddress || deliveryAddress, user.name || name)
+      });
       setMessage('Personal details and delivery address saved.');
     } catch (error) {
       setMessage(error.message || 'Your settings could not be saved.', true);
