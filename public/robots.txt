@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /html/admin.html
+Disallow: /html/analytics.html
+Disallow: /html/cart.html
+Disallow: /html/orders.html
+Disallow: /html/profile.html
+Disallow: /html/reset-password.html
+Disallow: /html/settings.html
+
+Sitemap: https://www.tradspire.com/sitemap.xml
