@@ -15,8 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const priceInput = form.elements.namedItem('price');
   const rentPriceInput = form.elements.namedItem('rentPricePerDay');
   const subImagesInput = form.elements.namedItem('subImages');
-  const productMainCategory = form.elements.namedItem('mainCategoryId');
-  const productSubCategory = form.elements.namedItem('subCategoryId');
+  const productCategoryOptions = document.querySelector('[data-product-categories]');
   const categoryForm = document.querySelector('[data-category-form]');
   const categoryList = document.querySelector('[data-category-list]');
   const categoryCount = document.querySelector('[data-category-count]');
@@ -97,17 +96,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     : [];
   const categoryNameFor = (id) => categories.find((category) => category._id === id)?.name || '';
 
-  const syncProductCategoryOptions = (mainId = productMainCategory.value, subId = '') => {
-    const mains = mainCategories();
-    productMainCategory.replaceChildren(new Option('Choose a main category', ''));
-    mains.forEach((category) => productMainCategory.add(new Option(category.name, category._id)));
-    productMainCategory.value = mains.some((category) => category._id === mainId) ? mainId : '';
+  const selectedProductCategoryIds = () => [...productCategoryOptions.querySelectorAll('input[name="categoryIds"]:checked')]
+    .map((input) => input.value);
 
-    const subs = subCategoriesFor(productMainCategory.value);
-    productSubCategory.replaceChildren(new Option('No subcategory', ''));
-    subs.forEach((category) => productSubCategory.add(new Option(category.name, category._id)));
-    productSubCategory.disabled = !subs.length;
-    productSubCategory.value = subs.some((category) => category._id === subId) ? subId : '';
+  const syncProductCategoryOptions = (selectedIds = selectedProductCategoryIds()) => {
+    productCategoryOptions.replaceChildren();
+    if (!categories.length) {
+      productCategoryOptions.append(makeText('p', 'admin-form-hint', 'No categories are available. Add categories in the Categories tab.'));
+      return;
+    }
+
+    mainCategories().forEach((mainCategory) => {
+      const mainLabel = document.createElement('label');
+      mainLabel.className = 'admin-category-choice';
+      const mainInput = document.createElement('input');
+      mainInput.type = 'checkbox';
+      mainInput.name = 'categoryIds';
+      mainInput.value = mainCategory._id;
+      mainInput.checked = selectedIds.includes(mainCategory._id);
+      mainLabel.append(mainInput, document.createTextNode(mainCategory.name));
+      productCategoryOptions.append(mainLabel);
+
+      const subcategories = subCategoriesFor(mainCategory._id);
+      if (!subcategories.length) return;
+      const subList = document.createElement('div');
+      subList.className = 'admin-subcategory-checkbox-list';
+      subcategories.forEach((subcategory) => {
+        const label = document.createElement('label');
+        label.className = 'admin-category-choice admin-subcategory-choice';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.name = 'categoryIds';
+        input.value = subcategory._id;
+        input.checked = selectedIds.includes(subcategory._id);
+        label.append(input, document.createTextNode(subcategory.name));
+        subList.append(label);
+      });
+      productCategoryOptions.append(subList);
+    });
   };
 
   const syncCategoryParentOptions = (selectedParent = categoryParent.value) => {
@@ -118,6 +144,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   const categoryLabelFor = (product) => {
+    if (Array.isArray(product.categoryIds)) {
+      const names = [];
+      product.categoryIds.forEach((entry) => {
+        const id = typeof entry === 'object' ? entry?._id : entry;
+        const category = categories.find((item) => item._id === id);
+        if (!category) return;
+        const parentName = categoryNameFor(parentIdOf(category));
+        [parentName, category.name].filter(Boolean).forEach((name) => {
+          if (!names.includes(name)) names.push(name);
+        });
+      });
+      if (names.length) return names.join(', ');
+    }
     const mainId = typeof product.mainCategoryId === 'object'
       ? product.mainCategoryId?._id
       : product.mainCategoryId || product.categoryId;
@@ -185,8 +224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderCategories();
     } catch (error) {
       categoryList.replaceChildren(makeText('p', 'empty-state', `Categories could not be loaded. ${error.message}`));
-      productMainCategory.replaceChildren(new Option('Categories could not be loaded', ''));
-      productSubCategory.replaceChildren(new Option('No subcategory', ''));
+      productCategoryOptions.replaceChildren(makeText('p', 'admin-form-hint', `Categories could not be loaded. ${error.message}`));
       setMessage(`Categories could not be loaded. ${error.message}`, true);
     } finally {
       categoryList.removeAttribute('aria-busy');
@@ -393,7 +431,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     carouselPreviewUrl = null;
   };
 
-  productMainCategory.addEventListener('change', () => syncProductCategoryOptions(productMainCategory.value));
   categoryParent.addEventListener('change', () => {
     if (editingCategoryId && categoryParent.value === editingCategoryId) categoryParent.value = '';
   });
@@ -487,7 +524,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    const selectedIds = selectedProductCategoryIds();
+    if (!selectedIds.length) {
+      setMessage('Select at least one product category.', true);
+      productCategoryOptions.querySelector('input[name="categoryIds"]')?.focus();
+      return;
+    }
     const body = new FormData(form);
+    body.delete('categoryIds');
+    selectedIds.forEach((id) => body.append('categoryIds', id));
+    const selectedSub = selectedIds.find((id) => parentIdOf(categories.find((category) => category._id === id)));
+    const selectedMain = selectedIds.find((id) => !parentIdOf(categories.find((category) => category._id === id)))
+      || (selectedSub ? parentIdOf(categories.find((category) => category._id === selectedSub)) : '');
+    if (selectedMain) body.set('mainCategoryId', selectedMain);
+    else body.delete('mainCategoryId');
+    if (selectedSub) body.set('subCategoryId', selectedSub);
+    else body.delete('subCategoryId');
     if (!imageInput.files.length) body.delete('image');
     if (!subImagesInput.files.length) body.delete('subImages');
     submitButton.disabled = true;
@@ -515,13 +567,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!product) return;
       editingId = product._id;
       form.elements.namedItem('name').value = product.name;
-      const mainCategoryId = typeof product.mainCategoryId === 'object'
-        ? product.mainCategoryId?._id
-        : product.mainCategoryId || product.categoryId || '';
-      const subCategoryId = typeof product.subCategoryId === 'object'
-        ? product.subCategoryId?._id
-        : product.subCategoryId || '';
-      syncProductCategoryOptions(mainCategoryId, subCategoryId);
+      const assignedCategoryIds = Array.isArray(product.categoryIds)
+        ? product.categoryIds.map((item) => typeof item === 'object' ? item?._id : item).filter(Boolean)
+        : [
+          typeof product.mainCategoryId === 'object'
+            ? product.mainCategoryId?._id
+            : product.mainCategoryId || product.categoryId,
+          typeof product.subCategoryId === 'object'
+            ? product.subCategoryId?._id
+            : product.subCategoryId
+        ].filter(Boolean);
+      syncProductCategoryOptions(assignedCategoryIds);
       listingTypeInputs.forEach((input) => { input.checked = listingTypesFor(product).includes(input.value); });
       form.elements.namedItem('price').value = product.price ?? '';
       form.elements.namedItem('rentPricePerDay').value = product.rentPricePerDay ?? '';

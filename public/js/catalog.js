@@ -24,7 +24,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     : [];
   const categoryName = (id) => categoriesById.get(id)?.name || '';
 
+  const assignedCategoryIds = (product) => Array.isArray(product.categoryIds)
+    ? product.categoryIds.map((item) => typeof item === 'object' ? item?._id : item).filter(Boolean)
+    : [];
+
   const productCategoryLabel = (product) => {
+    const assignedNames = [];
+    assignedCategoryIds(product).forEach((id) => {
+      const category = categoriesById.get(id);
+      if (!category) return;
+      const parentName = categoryName(parentIdOf(category));
+      [parentName, category.name].filter(Boolean).forEach((name) => {
+        if (!assignedNames.includes(name)) assignedNames.push(name);
+      });
+    });
+    if (assignedNames.length) return assignedNames.join(' · ');
+
     const mainId = typeof product.mainCategoryId === 'object'
       ? product.mainCategoryId?._id
       : product.mainCategoryId || product.categoryId;
@@ -94,6 +109,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     product.rentPricePerDay != null ? `Rent ₦${Number(product.rentPricePerDay).toFixed(2)}/day` : ''
   ].filter(Boolean).join(' · ');
 
+  const hasCategory = (product, id) => {
+    const assignedIds = assignedCategoryIds(product);
+    if (assignedIds.includes(id)) return true;
+    const mainId = typeof product.mainCategoryId === 'object'
+      ? product.mainCategoryId?._id
+      : product.mainCategoryId || product.categoryId;
+    const subId = typeof product.subCategoryId === 'object'
+      ? product.subCategoryId?._id
+      : product.subCategoryId;
+    return mainId === id || subId === id;
+  };
+
   const renderProducts = (products) => {
     if (!products.length) {
       grid.textContent = 'No products match these filters. Try another search or category.';
@@ -114,9 +141,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const content = document.createElement('div');
       content.className = 'product-card-content';
-      const category = document.createElement('p');
-      category.className = 'product-category';
-      category.textContent = productCategoryLabel(product);
       const name = document.createElement('h2');
       name.textContent = product.name;
       const origin = document.createElement('p');
@@ -125,7 +149,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       const price = document.createElement('p');
       price.className = 'product-price';
       price.textContent = pricesFor(product);
-      content.append(category, name, origin, price);
+      if (homeCategoryList) {
+        const category = document.createElement('p');
+        category.className = 'product-category';
+        category.textContent = productCategoryLabel(product);
+        content.append(category);
+      }
+      content.append(name, origin, price);
       card.append(image, content);
       return card;
     });
@@ -149,18 +179,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       const response = await window.TradspireAPI.request(`/api/products?${params.toString()}`, { silent: true });
       let products = response.products || [];
       if (mainCategoryId) {
-        products = products.filter((product) => {
-          const value = typeof product.mainCategoryId === 'object'
-            ? product.mainCategoryId?._id
-            : product.mainCategoryId || product.categoryId;
-          return value === mainCategoryId;
-        });
+        const descendantIds = new Set([
+          mainCategoryId,
+          ...subCategoriesFor(mainCategoryId).map((category) => category._id)
+        ]);
+        products = products.filter((product) => [...descendantIds].some((id) => hasCategory(product, id)));
       }
       if (subCategoryId) {
-        products = products.filter((product) => {
-          const value = typeof product.subCategoryId === 'object' ? product.subCategoryId?._id : product.subCategoryId;
-          return value === subCategoryId;
-        });
+        products = products.filter((product) => hasCategory(product, subCategoryId));
       }
       if (search) {
         const query = search.toLocaleLowerCase();

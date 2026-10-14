@@ -57,6 +57,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     if (breadcrumb) breadcrumb.textContent = product.name;
 
+    const assignedCategoryIds = Array.isArray(product.categoryIds)
+      ? product.categoryIds.map((item) => typeof item === 'object' ? item?._id : item).filter(Boolean)
+      : [];
+    const mainCategoryId = typeof product.mainCategoryId === 'object'
+      ? product.mainCategoryId?._id
+      : product.mainCategoryId || product.categoryId;
+    const subCategoryId = typeof product.subCategoryId === 'object'
+      ? product.subCategoryId?._id
+      : product.subCategoryId;
+    let categoriesById = new Map();
+    let categoryLookupError = null;
+    if (assignedCategoryIds.length || (
+      (mainCategoryId && !product.mainCategory?.name && typeof product.mainCategoryId !== 'object') ||
+      (subCategoryId && !product.subCategory?.name && typeof product.subCategoryId !== 'object')
+    )) {
+      try {
+        const categoryResponse = await window.TradspireAPI.request('/api/categories', { silent: true });
+        categoriesById = new Map((categoryResponse.categories || []).map((category) => [category._id, category]));
+      } catch (error) {
+        categoryLookupError = error;
+      }
+    }
+
     const imageWrap = document.createElement('div');
     imageWrap.className = 'product-detail-image-wrap';
     const image = document.createElement('img');
@@ -87,15 +110,46 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const copy = document.createElement('div');
     copy.className = 'product-detail-copy';
+    const assignedCategories = assignedCategoryIds
+      .map((id) => categoriesById.get(id) || product.categoryIds.find((item) =>
+        typeof item === 'object' && item?._id === id))
+      .filter(Boolean);
+    const assignedMainNames = [];
+    const assignedSubNames = [];
+    assignedCategories.forEach((category) => {
+      const parent = typeof category.parentId === 'object' ? category.parentId : categoriesById.get(category.parentId);
+      const parentName = parent?.name;
+      const isSubcategory = Boolean(category.parentId);
+      const mainName = isSubcategory ? parentName : category.name;
+      if (mainName && !assignedMainNames.includes(mainName)) assignedMainNames.push(mainName);
+      if (isSubcategory && category.name && !assignedSubNames.includes(category.name)) assignedSubNames.push(category.name);
+    });
     const mainCategory = product.mainCategory?.name
-      || (typeof product.mainCategoryId === 'object' ? product.mainCategoryId?.name : '');
+      || (typeof product.mainCategoryId === 'object' ? product.mainCategoryId?.name : '')
+      || categoriesById.get(mainCategoryId)?.name;
     const subCategory = product.subCategory?.name
-      || (typeof product.subCategoryId === 'object' ? product.subCategoryId?.name : '');
-    const category = [mainCategory, subCategory].filter(Boolean).join(' · ')
-      || (Array.isArray(product.categories)
+      || (typeof product.subCategoryId === 'object' ? product.subCategoryId?.name : '')
+      || categoriesById.get(subCategoryId)?.name;
+    const displayedMainCategories = assignedMainNames.length ? assignedMainNames : mainCategory ? [mainCategory] : [];
+    const displayedSubCategories = assignedSubNames.length ? assignedSubNames : subCategory ? [subCategory] : [];
+    if (displayedMainCategories.length) {
+      copy.append(makeText('p', 'product-category', `Main categor${displayedMainCategories.length === 1 ? 'y' : 'ies'}: ${displayedMainCategories.join(', ')}`));
+    }
+    else if (mainCategoryId && categoryLookupError) {
+      copy.append(makeText('p', 'product-category', `Main category could not be loaded. ${categoryLookupError.message}`));
+    }
+    if (displayedSubCategories.length) {
+      copy.append(makeText('p', 'product-category', `Subcategor${displayedSubCategories.length === 1 ? 'y' : 'ies'}: ${displayedSubCategories.join(', ')}`));
+    }
+    else if (subCategoryId && categoryLookupError) {
+      copy.append(makeText('p', 'product-category', `Subcategory could not be loaded. ${categoryLookupError.message}`));
+    }
+    if (!displayedMainCategories.length && !displayedSubCategories.length && !mainCategoryId && !subCategoryId) {
+      const legacyCategory = Array.isArray(product.categories)
         ? product.categories.join(' · ')
-        : product.categories || product.category || '');
-    if (category) copy.append(makeText('p', 'product-category', category));
+        : product.categories || product.category || '';
+      if (legacyCategory) copy.append(makeText('p', 'product-category', legacyCategory));
+    }
     copy.append(makeText('h1', '', product.name));
     if (product.origin) copy.append(makeText('p', 'product-origin', `Made in ${product.origin}`));
     copy.append(makeText('p', 'product-detail-price', ''));
