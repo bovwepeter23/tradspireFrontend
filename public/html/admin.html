@@ -29,13 +29,14 @@
           <h2 data-product-form-heading>Add product</h2>
           <label for="productName">Product name</label>
           <input id="productName" name="name" type="text" maxlength="120" required>
-          <fieldset class="admin-category-choices">
-            <legend>Product categories</legend>
-            <p class="admin-form-hint">Select one or more categories for this product.</p>
-            <div class="admin-category-checkbox-list" data-product-categories>
-              <p class="admin-form-hint">Loading categories...</p>
-            </div>
-          </fieldset>
+          <label for="productMainCategory">Main category</label>
+          <select id="productMainCategory" name="mainCategoryId" required>
+            <option value="">Loading categories...</option>
+          </select>
+          <label for="productSubCategory">Subcategory</label>
+          <select id="productSubCategory" name="subCategoryId" disabled>
+            <option value="">No subcategory</option>
+          </select>
           <fieldset class="admin-choice-group">
             <legend>Listing options</legend>
             <label><input type="checkbox" name="listingType" value="buy" checked> Buy</label>
