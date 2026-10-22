@@ -372,9 +372,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       row.className = 'admin-order-row';
       const summary = document.createElement('div');
       summary.className = 'admin-order-summary';
+      const customerPhone = order.deliveryAddress?.phone
+        || order.user?.phone
+        || order.customer?.phone
+        || order.phone;
+      const phoneDetails = makeText('p', 'admin-product-meta', `Phone: ${customerPhone || 'Not provided'}`);
+      if (customerPhone) {
+        const phoneLink = document.createElement('a');
+        phoneLink.href = `tel:${String(customerPhone).replace(/[^\d+]/g, '')}`;
+        phoneLink.textContent = String(customerPhone);
+        phoneDetails.replaceChildren(document.createTextNode('Phone: '), phoneLink);
+      }
       summary.append(
         makeText('h3', '', `Order ${order._id}`),
         makeText('p', 'admin-product-meta', `${order.user?.name || 'Customer'} · ${order.user?.email || 'No email'}`),
+        phoneDetails,
         makeText('p', 'admin-product-meta', new Date(order.createdAt).toLocaleDateString())
       );
       const items = makeText('p', 'admin-product-meta', (order.items || [])
