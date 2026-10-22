@@ -365,7 +365,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const purchaseStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
     const rentalStatuses = ['pending', 'processing', 'shipped', 'delivered', 'return_due', 'returned', 'inspection', 'completed', 'deposit_refunded', 'cancelled'];
     adminOrdersList.replaceChildren(...orders.map((order) => {
-      const isRentalOrder = (order.items || []).some((item) => item.purchaseType === 'rent');
+      const isRentalOrder = ['rent', 'rental'].includes(String(order.orderType || order.purchaseType || '').toLowerCase())
+        || (order.items || []).some((item) => item.purchaseType === 'rent');
       const statuses = isRentalOrder ? rentalStatuses : purchaseStatuses;
       const row = document.createElement('article');
       row.className = 'admin-order-row';
@@ -377,7 +378,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         makeText('p', 'admin-product-meta', new Date(order.createdAt).toLocaleDateString())
       );
       const items = makeText('p', 'admin-product-meta', (order.items || [])
-        .map((item) => `${item.name} × ${item.quantity}${item.purchaseType === 'rent' ? ` · rent ${item.rentalDays || 1} day(s)` : ' · buy'}`)
+        .map((item) => {
+          const isRentalItem = item.purchaseType === 'rent' || (isRentalOrder && !item.purchaseType);
+          return `${item.name} × ${item.quantity}${isRentalItem ? ` · rent ${item.rentalDays || 1} day(s)` : ' · buy'}`;
+        })
         .join(' · '));
       const address = order.deliveryAddress || {};
       const destination = makeText('p', 'admin-product-meta', [
@@ -414,7 +418,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const loadAdminOrders = async () => {
     try {
       const response = await window.TradspireAPI.request('/api/orders/admin', { token });
-      renderAdminOrders(response.orders || []);
+      const orders = [
+        ...(Array.isArray(response.orders) ? response.orders : []),
+        ...(Array.isArray(response.rentalOrders) ? response.rentalOrders : []),
+        ...(Array.isArray(response.rentals) ? response.rentals : [])
+      ];
+      renderAdminOrders([...new Map(orders.map((order, index) => [order._id || order.id || `order-${index}`, order])).values()]);
     } catch (error) {
       adminOrdersList.replaceChildren(makeText('p', 'empty-state', error.message || 'Orders could not be loaded.'));
     }
