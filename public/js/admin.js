@@ -361,8 +361,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    const statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+    const purchaseStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+    const rentalStatuses = ['pending', 'processing', 'shipped', 'delivered', 'return_due', 'returned', 'inspection', 'completed', 'deposit_refunded', 'cancelled'];
     adminOrdersList.replaceChildren(...orders.map((order) => {
+      const isRentalOrder = (order.items || []).some((item) => item.purchaseType === 'rent');
+      const statuses = isRentalOrder ? rentalStatuses : purchaseStatuses;
       const row = document.createElement('article');
       row.className = 'admin-order-row';
       const summary = document.createElement('div');
@@ -391,9 +394,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       statuses.forEach((value) => {
         const option = document.createElement('option');
         option.value = value;
-        option.textContent = value.charAt(0).toUpperCase() + value.slice(1);
+        option.textContent = value.split('_').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
         status.append(option);
       });
+      if (!statuses.includes(order.status)) {
+        const currentStatus = document.createElement('option');
+        currentStatus.value = order.status;
+        currentStatus.textContent = order.status;
+        status.append(currentStatus);
+      }
       status.value = order.status;
       status.dataset.previousStatus = order.status;
       row.append(summary, items, destination, makeText('strong', 'admin-product-price', `₦${Number(order.total).toFixed(2)}`), status);

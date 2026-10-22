@@ -14,7 +14,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     return element;
   };
   const money = (amount) => `₦${Number(amount || 0).toFixed(2)}`;
-  const statusLabel = (status) => status.charAt(0).toUpperCase() + status.slice(1);
+  const statusLabel = (status) => status.split('_').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+  const rentalStages = [
+    ['pending', 'Booking requested'],
+    ['processing', 'Confirmed and preparing'],
+    ['shipped', 'Dispatched'],
+    ['delivered', 'Rental in progress'],
+    ['return_due', 'Return due'],
+    ['returned', 'Returned'],
+    ['inspection', 'Item inspection'],
+    ['completed', 'Rental complete'],
+    ['deposit_refunded', 'Deposit refunded']
+  ];
 
   const renderOrders = (orders) => {
     if (!orders.length) {
@@ -34,9 +45,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         makeText('p', 'order-label', `Order ${order._id}`),
         makeText('p', 'order-date', new Date(order.createdAt).toLocaleDateString())
       );
-      const state = makeText('span', `order-status order-status-${order.status}`, statusLabel(order.status));
+      const normalizedStatus = String(order.status || 'unknown').toLowerCase();
+      const state = makeText('span', `order-status order-status-${normalizedStatus.replaceAll('_', '-')}`, statusLabel(normalizedStatus));
       header.append(details, state);
 
+      const isRentalOrder = (order.items || []).some((item) => item.purchaseType === 'rent');
       const items = document.createElement('div');
       items.className = 'order-items';
       (order.items || []).forEach((item) => {
@@ -53,6 +66,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         row.append(image, info, makeText('strong', '', money(item.lineTotal)));
         items.append(row);
       });
+
+      if (isRentalOrder) {
+        const lifecycle = document.createElement('section');
+        lifecycle.className = 'rental-lifecycle';
+        lifecycle.setAttribute('aria-label', 'Rental lifecycle');
+        const lifecycleTitle = makeText('h3', '', 'Rental progress');
+        lifecycle.append(lifecycleTitle);
+        if (normalizedStatus === 'cancelled') {
+          lifecycle.append(makeText('p', 'rental-lifecycle-cancelled', 'This rental was cancelled.'));
+        } else {
+          const currentStage = rentalStages.findIndex(([status]) => status === normalizedStatus);
+          const stages = document.createElement('ol');
+          rentalStages.forEach(([status, label], index) => {
+            const stage = makeText('li', '', label);
+            if (currentStage >= 0 && index < currentStage) stage.classList.add('is-complete');
+            if (index === currentStage) stage.classList.add('is-current');
+            stages.append(stage);
+          });
+          lifecycle.append(stages);
+          const returnDate = order.returnDueAt || order.rentalReturnDate || order.returnDate;
+          if (returnDate) {
+            const date = new Date(returnDate);
+            if (!Number.isNaN(date.getTime())) {
+              lifecycle.append(makeText('p', 'rental-return-date', `Return by ${date.toLocaleDateString()}`));
+            }
+          }
+        }
+        card.append(lifecycle);
+      }
 
       const footer = document.createElement('footer');
       footer.className = 'order-card-footer';

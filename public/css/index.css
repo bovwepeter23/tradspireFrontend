@@ -1334,14 +1334,14 @@ button.nav-logout-button:hover {
   position: sticky;
   top: 20px;
   align-self: start;
-  min-height: 400px;
-  height: auto;
+  height: 320px;
+  min-height: 0;
   padding: 24px;
   background: var(--bg-card);
 }
 
 .product-page .product-detail-image {
-  min-height: 336px;
+  min-height: 0;
 }
 
 .product-page .product-detail-gallery {
@@ -1496,11 +1496,7 @@ button.nav-logout-button:hover {
   .product-page .product-detail-image-wrap {
     position: static;
     grid-row: span 2;
-    min-height: 320px;
-  }
-
-  .product-page .product-detail-image {
-    min-height: 256px;
+    height: 256px;
   }
 
   .product-page .product-price-panel {
@@ -1515,12 +1511,8 @@ button.nav-logout-button:hover {
 
   .product-page .product-detail-image-wrap {
     position: static;
-    min-height: 256px;
+    height: 205px;
     padding: 16px;
-  }
-
-  .product-page .product-detail-image {
-    min-height: 216px;
   }
 
   .product-page .product-detail-copy {
@@ -1808,6 +1800,67 @@ button.nav-logout-button:hover {
 .order-status-cancelled {
   border-color: rgba(229, 57, 53, 0.55);
   color: #ff8c7a;
+}
+
+.order-status-return-due,
+.order-status-returned,
+.order-status-inspection {
+  border-color: rgba(168, 160, 232, 0.55);
+  color: #c1baf5;
+}
+
+.order-status-completed,
+.order-status-deposit-refunded {
+  border-color: rgba(80, 199, 170, 0.55);
+  color: #65d7ba;
+}
+
+.rental-lifecycle {
+  margin: 14px 0;
+  padding: 14px;
+  border: 1px solid var(--border-gold);
+  border-radius: 4px;
+  background: var(--bg-card);
+}
+
+.rental-lifecycle h3 {
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.rental-lifecycle ol {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  list-style: none;
+}
+
+.rental-lifecycle li {
+  padding: 8px;
+  border-left: 3px solid var(--border-gold);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+}
+
+.rental-lifecycle li.is-complete {
+  border-color: #50c7aa;
+  color: var(--text-primary);
+}
+
+.rental-lifecycle li.is-current {
+  border-color: var(--primary-gold);
+  color: var(--primary-gold);
+  font-weight: 700;
+}
+
+.rental-lifecycle-cancelled,
+.rental-return-date {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.rental-return-date {
+  margin-top: 12px;
 }
 
 .order-items {
@@ -2789,7 +2842,12 @@ button.nav-logout-button:hover {
 .analytics-status-fill.status-delivered { background: #50c7aa; }
 .analytics-status-fill.status-cancelled { background: #ef806d; }
 .analytics-status-fill.status-processing,
-.analytics-status-fill.status-shipped { background: #a8a0e8; }
+.analytics-status-fill.status-shipped,
+.analytics-status-fill.status-return_due,
+.analytics-status-fill.status-returned,
+.analytics-status-fill.status-inspection { background: #a8a0e8; }
+.analytics-status-fill.status-completed,
+.analytics-status-fill.status-deposit_refunded { background: #50c7aa; }
 
 .analytics-product-row {
   min-width: 0;
@@ -2910,7 +2968,12 @@ button.nav-logout-button:hover {
 .analytics-recent-status.status-delivered { border-left-color: #50c7aa; }
 .analytics-recent-status.status-cancelled { border-left-color: #ef806d; }
 .analytics-recent-status.status-processing,
-.analytics-recent-status.status-shipped { border-left-color: #a8a0e8; }
+.analytics-recent-status.status-shipped,
+.analytics-recent-status.status-return_due,
+.analytics-recent-status.status-returned,
+.analytics-recent-status.status-inspection { border-left-color: #a8a0e8; }
+.analytics-recent-status.status-completed,
+.analytics-recent-status.status-deposit_refunded { border-left-color: #50c7aa; }
 
 .analytics-recent-total {
   text-align: right;

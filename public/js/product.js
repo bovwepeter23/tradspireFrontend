@@ -178,7 +178,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       optionText.textContent = label;
       optionLabel.append(input, optionText);
       modeOptions.append(optionLabel);
-      input.addEventListener('change', syncMode);
     };
     if (types.includes('buy') && product.price != null) addModeOption('buy', `Buy · ₦${Number(product.price).toFixed(2)}`);
     if (types.includes('rent') && product.rentPricePerDay != null) addModeOption('rent', `Rent · ₦${Number(product.rentPricePerDay).toFixed(2)} per day`);
@@ -227,6 +226,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       daysWrap.hidden = mode !== 'rent';
       addButton.disabled = !mode;
     };
+    modeOptions.addEventListener('change', syncMode);
     addButton.addEventListener('click', async () => {
       const mode = selectedMode();
       const selectedQuantity = Number(quantity.value);
@@ -284,6 +284,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         .catch(() => {});
     }
   } catch (error) {
-    showUnavailable(error.status === 404 ? 'We could not find that item.' : 'Product details could not be loaded.');
+    if (error.status === 404) {
+      showUnavailable('We could not find that item.');
+      return;
+    }
+    console.error('Product details could not be loaded.', { productId, error });
+    const reason = error instanceof Error ? error.message : String(error);
+    showUnavailable(`Product details could not be loaded${reason ? `: ${reason}` : '.'}`);
   }
 });

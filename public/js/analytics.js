@@ -24,12 +24,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const rangeButtons = [...page.querySelectorAll('[data-analytics-range]')];
   const currency = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 });
   const rangeLabels = { '7d': 'Last 7 days', '30d': 'Last 30 days', '90d': 'Last 90 days', all: 'All time' };
-  const knownStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+  const knownStatuses = ['pending', 'processing', 'shipped', 'delivered', 'return_due', 'returned', 'inspection', 'completed', 'deposit_refunded', 'cancelled'];
   let orders = [];
   let selectedRange = '30d';
 
   const money = (value) => currency.format(Number.isFinite(value) ? value : 0);
-  const titleCase = (value) => value ? value.charAt(0).toUpperCase() + value.slice(1) : 'Unknown';
+  const titleCase = (value) => value ? value.split('_').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ') : 'Unknown';
   const orderDate = (order) => {
     const date = new Date(order.createdAt);
     return Number.isNaN(date.getTime()) ? null : date;
