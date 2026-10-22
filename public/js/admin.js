@@ -235,6 +235,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const categoriesFor = categoryLabelFor;
 
   const listingTypesFor = (product) => {
+    if (Array.isArray(product.availableFor)) return product.availableFor;
     if (Array.isArray(product.listingType)) return product.listingType;
     if (Array.isArray(product.listingTypes)) return product.listingTypes;
     if (product.listingType) return [product.listingType];

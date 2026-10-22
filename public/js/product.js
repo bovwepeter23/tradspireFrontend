@@ -179,8 +179,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       optionLabel.append(input, optionText);
       modeOptions.append(optionLabel);
     };
-    if (types.includes('buy') && product.price != null) addModeOption('buy', `Buy · ₦${Number(product.price).toFixed(2)}`);
-    if (types.includes('rent') && product.rentPricePerDay != null) addModeOption('rent', `Rent · ₦${Number(product.rentPricePerDay).toFixed(2)} per day`);
+    if (types.includes('buy') && product.price != null) addModeOption('buy', 'Buy');
+    if (types.includes('rent') && product.rentPricePerDay != null) addModeOption('rent', 'Rent');
 
     const quantityLabel = document.createElement('label');
     quantityLabel.textContent = 'Quantity';
@@ -275,7 +275,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       addButton,
       message
     );
-    container.replaceChildren(imageWrap, copy, purchasePanel, descriptionWrap);
+    const productInfo = document.createElement('div');
+    productInfo.className = 'product-detail-info';
+    productInfo.append(copy, purchasePanel);
+    container.replaceChildren(imageWrap, productInfo, descriptionWrap);
     syncMode();
     const token = localStorage.getItem('token');
     if (token) {
