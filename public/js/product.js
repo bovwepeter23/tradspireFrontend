@@ -162,14 +162,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     const types = availableFor(product);
     const purchasePanel = document.createElement('div');
     purchasePanel.className = 'product-price-panel';
-    const modeLabel = makeText('label', 'product-price-caption', 'Purchase option');
-    const mode = document.createElement('select');
-    mode.className = 'product-mode';
-    mode.id = 'productPurchaseType';
-    mode.setAttribute('aria-label', 'Purchase type');
-    modeLabel.htmlFor = mode.id;
-    if (types.includes('buy') && product.price != null) mode.append(new Option(`Buy for ₦${Number(product.price).toFixed(2)}`, 'buy'));
-    if (types.includes('rent') && product.rentPricePerDay != null) mode.append(new Option(`Rent for ₦${Number(product.rentPricePerDay).toFixed(2)} per day`, 'rent'));
+    const modeOptions = document.createElement('fieldset');
+    modeOptions.className = 'product-mode-options';
+    const modeLegend = makeText('legend', 'product-price-caption', 'Purchase option');
+    modeOptions.append(modeLegend);
+    const addModeOption = (type, label) => {
+      const optionLabel = document.createElement('label');
+      optionLabel.className = 'product-mode-option';
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'productPurchaseType';
+      input.value = type;
+      input.checked = !modeOptions.querySelector('input:checked');
+      const optionText = document.createElement('span');
+      optionText.textContent = label;
+      optionLabel.append(input, optionText);
+      modeOptions.append(optionLabel);
+      input.addEventListener('change', syncMode);
+    };
+    if (types.includes('buy') && product.price != null) addModeOption('buy', `Buy · ₦${Number(product.price).toFixed(2)}`);
+    if (types.includes('rent') && product.rentPricePerDay != null) addModeOption('rent', `Rent · ₦${Number(product.rentPricePerDay).toFixed(2)} per day`);
 
     const quantityLabel = document.createElement('label');
     quantityLabel.textContent = 'Quantity';
@@ -203,22 +215,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     addButton.type = 'button';
     addButton.textContent = 'Add to cart';
     const message = makeText('p', 'product-cart-message', '');
+    const selectedMode = () => modeOptions.querySelector('input:checked')?.value || '';
     const syncMode = () => {
-      const isRental = mode.value === 'rent';
+      const mode = selectedMode();
+      modeOptions.querySelectorAll('.product-mode-option').forEach((option) => {
+        option.classList.toggle('is-selected', option.querySelector('input').checked);
+      });
+      const isRental = mode === 'rent';
       const price = isRental ? product.rentPricePerDay : product.price;
       displayedPrice.textContent = price == null ? '' : `₦${Number(price).toFixed(2)}${isRental ? ' / day' : ''}`;
-      daysWrap.hidden = mode.value !== 'rent';
-      addButton.disabled = !mode.value;
+      daysWrap.hidden = mode !== 'rent';
+      addButton.disabled = !mode;
     };
-    mode.addEventListener('change', syncMode);
     addButton.addEventListener('click', async () => {
+      const mode = selectedMode();
       const selectedQuantity = Number(quantity.value);
       const rentalDays = Number(days.value);
       if (!Number.isInteger(selectedQuantity) || selectedQuantity < 1 || selectedQuantity > 99) {
         message.textContent = 'Choose a quantity from 1 to 99.';
         return;
       }
-      if (mode.value === 'rent' && (!Number.isInteger(rentalDays) || rentalDays < 1 || rentalDays > 365)) {
+      if (mode === 'rent' && (!Number.isInteger(rentalDays) || rentalDays < 1 || rentalDays > 365)) {
         message.textContent = 'Choose rental days from 1 to 365.';
         return;
       }
@@ -238,8 +255,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           body: {
             productId,
             quantity: selectedQuantity,
-            purchaseType: mode.value,
-            rentalDays: mode.value === 'rent' ? rentalDays : null
+            purchaseType: mode,
+            rentalDays: mode === 'rent' ? rentalDays : null
           }
         });
         setCartCount(cartItemsFrom(response));
@@ -247,13 +264,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       } catch (error) {
         message.textContent = error.message || 'The item could not be added to your cart.';
       } finally {
-        addButton.disabled = !mode.value;
+        addButton.disabled = !selectedMode();
       }
     });
 
     purchasePanel.append(
-      modeLabel,
-      mode,
+      modeOptions,
       controls,
       makeText('p', 'product-purchase-note', 'Your selected option and quantity will be saved to your account cart.'),
       addButton,

@@ -30,18 +30,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (sidebar) sidebar.id = "appSidebar";
 
-  document.querySelector("[data-admin-content]")?.removeAttribute("hidden");
-
   const navigation = [
     { label: "Home", icon: "home", page: "index.html" },
     { label: "Cart", icon: "shopping-cart", page: "cart.html" },
     { label: "Orders", icon: "shopping-bag", page: "orders.html" },
     { label: "Settings", icon: "settings", page: "settings.html" },
-    { label: "Account", icon: "user-round", page: "profile.html" },
-    { label: "Analytics", icon: "chart-no-axes-combined", page: "analytics.html" }
+    { label: "Account", icon: "user-round", page: "profile.html" }
   ];
 
-  navigation.push({ label: "Admin", icon: "shield-check", page: "admin.html" });
+  if (localStorage.getItem("role")?.toLowerCase() === "admin") {
+    navigation.push(
+      { label: "Analytics", icon: "chart-no-axes-combined", page: "analytics.html" },
+      { label: "Admin", icon: "shield-check", page: "admin.html" }
+    );
+  }
 
   if (sidebar) {
     sidebar.innerHTML = `<nav class="sidebar-nav" aria-label="Main navigation">${navigation.map((item) => {

@@ -6,6 +6,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!form || !message || !inventory || !count) return;
 
   const token = localStorage.getItem('token');
+  try {
+    if (!await window.TradspireAPI.isAdmin(token)) {
+      window.location.replace('../index.html');
+      return;
+    }
+  } catch (error) {
+    const accessMessage = document.createElement('p');
+    accessMessage.className = 'empty-state';
+    accessMessage.textContent = `Administrator access could not be verified. ${error.message}`;
+    const adminContent = document.querySelector('[data-admin-content]');
+    adminContent.replaceChildren(accessMessage);
+    adminContent.hidden = false;
+    return;
+  }
+  document.querySelector('[data-admin-content]').hidden = false;
+
   const imageInput = form.elements.namedItem('image');
   const imagePreview = document.querySelector('[data-image-preview]');
   const heading = document.querySelector('[data-product-form-heading]');
@@ -678,6 +694,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  await loadCategories();
   await loadProducts();
   await loadCarousel();
   await loadAdminOrders();

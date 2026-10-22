@@ -1,8 +1,23 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const page = document.querySelector('[data-analytics-page]');
   if (!page) return;
 
   const token = localStorage.getItem('token');
+  try {
+    if (!await window.TradspireAPI.isAdmin(token)) {
+      window.location.replace('../index.html');
+      return;
+    }
+  } catch (error) {
+    const accessMessage = document.createElement('p');
+    accessMessage.className = 'empty-state';
+    accessMessage.textContent = `Administrator access could not be verified. ${error.message}`;
+    page.replaceChildren(accessMessage);
+    page.hidden = false;
+    return;
+  }
+  page.hidden = false;
+
   const message = page.querySelector('[data-analytics-message]');
   const loginLink = page.querySelector('[data-analytics-login]');
   const refreshButton = page.querySelector('[data-analytics-refresh]');

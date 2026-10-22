@@ -88,5 +88,15 @@
     return data;
   };
 
-  window.TradspireAPI = { baseUrl, request };
+  const isAdmin = async (token) => {
+    if (!token) return false;
+    const response = await request('/api/users/profile', { token, silent: true });
+    const user = response.data?.user || response.user;
+    const authorized = String(user?.role || '').toLowerCase() === 'admin';
+    if (authorized) localStorage.setItem('role', user.role);
+    else localStorage.removeItem('role');
+    return authorized;
+  };
+
+  window.TradspireAPI = { baseUrl, request, isAdmin };
 })();
